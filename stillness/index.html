@@ -113,12 +113,37 @@ body.is-night .wake{opacity:1;pointer-events:auto}
 @keyframes cue{to{top:110%}}
 
 /* ── manifesto ── */
-.manifesto{position:relative;height:230vh}
-.manifesto .sticky{position:sticky;top:0;height:100vh;display:grid;place-items:center;padding:0 28px}
+.manifesto{position:relative;padding:22vh 28px}
+.manifesto .sticky{display:grid;place-items:center}
 .manifesto p{font-family:var(--serif);font-size:clamp(30px,4.6vw,66px);line-height:1.18;max-width:17em;text-align:center;letter-spacing:-.01em}
-.manifesto .w{color:rgba(233,240,242,.14);transition:color .5s}
+.manifesto .w{color:rgba(233,240,242,.3);transition:color .5s}
 .manifesto .w.on{color:var(--text)}
 .manifesto .w.em.on{color:var(--accent-light);font-style:italic}
+
+/* ── story (pinned, illustrated) ── */
+@property --tint { syntax: '<color>'; inherits: true; initial-value: #10233a; }
+.story{position:relative;height:640vh}
+.story .pin{position:sticky;top:0;height:100vh;overflow:hidden;--tint:#10233a;transition:--tint 1.4s var(--ease)}
+.story .pin::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 28% 50%,color-mix(in srgb,var(--tint) 55%,transparent),transparent 70%);pointer-events:none}
+.story .inner{position:relative;height:100%;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:5vw;max-width:1240px;margin:0 auto;padding:0 28px}
+.frame{position:relative;height:min(84vh,900px);aspect-ratio:9/16;justify-self:center;border-radius:26px;overflow:hidden;background:#05080d;
+  box-shadow:0 0 0 1px var(--line),0 60px 120px -40px rgba(0,0,0,.9)}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity 1.3s var(--ease),transform 7s linear}
+.frame img.on{opacity:1;transform:scale(1)}
+.caps{position:relative;height:min(46vh,420px)}
+.cap{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease);pointer-events:none}
+.cap.on{opacity:1;transform:none}
+.cap.past{transform:translateY(-26px)}
+.cap .time{font-size:12px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase}
+.cap h2{font-family:var(--serif);font-weight:400;font-size:clamp(38px,5vw,78px);line-height:1.04;letter-spacing:-.02em;margin:14px 0 16px}
+.cap h2 em{color:var(--accent-light)}
+.cap p{color:rgba(233,240,242,.68);max-width:24em;font-size:clamp(16px,1.2vw,18px)}
+.sdots{position:absolute;right:28px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px}
+.sdots i{width:6px;height:6px;border-radius:50%;background:var(--faint);transition:background .5s,transform .5s}
+.sdots i.on{background:var(--accent);transform:scale(1.5);box-shadow:0 0 10px var(--accent)}
+.shint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);transition:opacity .6s}
+.shint span{position:relative;width:1px;height:40px;background:var(--line);overflow:hidden}
+.shint span::after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--accent);animation:cue 2.2s var(--ease) infinite}
 
 /* ── modes (pinned story) ── */
 .modes{position:relative;height:440vh}
@@ -221,6 +246,13 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
 /* ── responsive ── */
 @media (max-width:900px){
   nav .links a:not(.pill){display:none}
+  .story .inner{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:center;gap:18px;padding:70px 20px 20px}
+  .frame{height:56vh}
+  .caps{height:30vh}
+  .cap h2{font-size:clamp(30px,8.5vw,44px);margin:8px 0 8px}
+  .cap p{font-size:15px}
+  .sdots{right:12px}
+  .shint{bottom:6px}
   .modes{height:auto}
   .modes .pin{position:static;height:auto;display:block;padding:120px 28px 40px}
   .stage{display:none}
@@ -241,6 +273,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .rv{opacity:1;transform:none}
   .manifesto{height:auto}.manifesto .sticky{position:static;height:auto;padding:140px 28px}
   .manifesto .w{color:var(--text)}
+  .story{height:auto}.story .pin{position:static;height:auto}.story .inner{display:block;padding:100px 20px}.frame{display:none}.caps{height:auto}.cap{position:static;opacity:1;transform:none;margin-bottom:60px}.sdots,.shint{display:none}
 }
 </style>
 </head>
@@ -282,6 +315,32 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   </div>
   <div class="scrollcue" aria-hidden="true"></div>
 </header>
+
+
+<section class="story" id="story" aria-label="A night with Stillness">
+  <div class="pin" id="storyPin">
+    <div class="inner">
+      <div class="frame" aria-hidden="true">
+        <img src="img/story1.webp" alt="" class="on">
+        <img src="img/story2.webp" alt="" loading="lazy">
+        <img src="img/story3.webp" alt="" loading="lazy">
+        <img src="img/story4.webp" alt="" loading="lazy">
+        <img src="img/story5.webp" alt="" loading="lazy">
+        <img src="img/story6.webp" alt="" loading="lazy">
+      </div>
+      <div class="caps">
+        <div class="cap on" data-tint="#13325a"><div class="time">9:40 pm</div><h2>Just one more video.</h2><p>You picked it up to check one thing. Forty minutes ago.</p></div>
+        <div class="cap" data-tint="#163a66"><div class="time">9:41 pm</div><h2>Set how long.<br><em>Hold to lock it.</em></h2><p>Turn the dial, hold the orb, and let the decision be made once.</p></div>
+        <div class="cap" data-tint="#0c1626"><div class="time">9:41 pm</div><h2>It won't open<br>until morning.</h2><p>No negotiating, no "just five more minutes". Even a restart won't end it.</p></div>
+        <div class="cap" data-tint="#4a2f14"><div class="time">10:15 pm</div><h2>The evening<br><em>comes back.</em></h2><p>The book, the journal, the conversation you kept meaning to have.</p></div>
+        <div class="cap" data-tint="#0d1d36"><div class="time">11:30 pm</div><h2>Sleep comes easier.</h2><p>The phone stays dark on the nightstand, where it belongs.</p></div>
+        <div class="cap" data-tint="#6b4a1c"><div class="time">7:05 am</div><h2>Wake up to your day,<br><em>not your feed.</em></h2><p>That's all Stillness is for.</p></div>
+      </div>
+    </div>
+    <div class="sdots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="shint" id="shint" aria-hidden="true">Scroll<span></span></div>
+  </div>
+</section>
 
 <section class="manifesto" id="manifesto" aria-label="Why Stillness">
   <div class="sticky">
@@ -597,14 +656,23 @@ let curStep = -1;
 function setStep(i) { if (i === curStep) return; curStep = i; stageImgs.forEach((im, k) => im.classList.toggle('on', k === i)); stepEls.forEach((s, k) => s.classList.toggle('on', k === i)); }
 
 /* ── scroll handler ──────────────────────────────────────────── */
-const nav = $('#nav'); const manifesto = $('#manifesto'); let lastY = scrollY, ticking = false;
+const nav = $('#nav'); const manifesto = $('#manifesto');
+const story = $('#story'), storyPin = $('#storyPin'), sImgs = [...story.querySelectorAll('.frame img')], sCaps = [...story.querySelectorAll('.cap')], sDots = [...story.querySelectorAll('.sdots i')], shint = $('#shint');
+let curS = 0;
+function setStory(i) { if (i === curS) return; curS = i;
+  sImgs.forEach((im, k) => im.classList.toggle('on', k === i));
+  sCaps.forEach((c, k) => { c.classList.toggle('on', k === i); c.classList.toggle('past', k < i); });
+  sDots.forEach((d, k) => d.classList.toggle('on', k === i));
+  storyPin.style.setProperty('--tint', sCaps[i].dataset.tint); } let lastY = scrollY, ticking = false;
 function onScroll() {
   ticking = false; const y = scrollY, vh = innerHeight;
   nav.classList.toggle('solid', y > vh * .6);
   if (y > vh && y > lastY + 4) nav.classList.add('hide'); else if (y < lastY - 4 || y < vh) nav.classList.remove('hide'); lastY = y;
   if (!REDUCE) {
-    const mr = manifesto.getBoundingClientRect(); const mpg = clamp(-mr.top / (mr.height - vh), 0, 1);
-    const lit = Math.floor(mpg * words.length * 1.15); words.forEach((w, i) => w.classList.toggle('on', i < lit));
+    const mr = manifesto.getBoundingClientRect(); const mpg = clamp((vh * .9 - mr.top) / (mr.height * .75), 0, 1);
+    const lit = Math.floor(mpg * words.length * 1.05); words.forEach((w, i) => w.classList.toggle('on', i < lit));
+    const sr = story.getBoundingClientRect(); const spg = clamp(-sr.top / (sr.height - vh), 0, .9999);
+    setStory(Math.floor(spg * sImgs.length)); shint.style.opacity = spg > .05 ? 0 : 1;
   }
   if (innerWidth > 900) {
     const r = modes.getBoundingClientRect(); const pg = clamp(-r.top / (r.height - vh), 0, .9999);

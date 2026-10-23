@@ -258,12 +258,6 @@ section.block{padding:150px 0}
 .no{color:var(--faint)}
 .compare small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .compare th.us{color:var(--text);font-family:var(--serif);font-size:22px;letter-spacing:0;text-transform:none}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);margin-top:80px;border-top:1px solid var(--line)}
-.grid4 > div{padding:30px 26px 10px;border-left:1px solid var(--line)}
-.grid4 > div:first-child{border-left:0;padding-left:0}
-.grid4 .n{font-size:12px;letter-spacing:.3em;color:var(--accent)}
-.grid4 h3{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;margin:16px 0 10px}
-.grid4 p{color:rgba(233,240,242,.62);font-size:15.5px}
 .plans{display:grid;grid-template-columns:1fr 1.12fr;gap:22px;margin-top:56px;align-items:stretch}
 .plan{border:1px solid var(--line);border-radius:28px;padding:36px 36px 30px;background:var(--card);position:relative;overflow:hidden;display:flex;flex-direction:column}
 .plan.premium{border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 9%,transparent),rgba(255,255,255,.025) 55%);box-shadow:0 0 70px -24px color-mix(in srgb,var(--accent) 45%,transparent)}
@@ -345,8 +339,6 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .dots{display:flex!important;justify-content:center;gap:4px;margin-top:14px}
   .compare td.c,.compare th.c{width:24%}
   .compare th,.compare td{padding:14px 6px;font-size:14.5px}
-  .grid4{grid-template-columns:1fr 1fr}
-  .grid4 > div{border-left:0;padding:26px 14px 26px 0;border-bottom:1px solid var(--line)}
   .plans{grid-template-columns:1fr}
   .plan{padding:30px 22px 24px}
   .plan .tag{position:static;display:inline-block;margin-bottom:14px;align-self:flex-start}
@@ -363,7 +355,6 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .tab i{width:19px;height:19px}
 }
 @media (max-width:560px){
-  .grid4{grid-template-columns:1fr} .wrap{padding:0 20px} nav{padding:16px 20px}
   .hero-grid{padding:86px 20px 44px;gap:26px}
   .h1{margin:14px 0 16px}
   .hero-grid .lead{font-size:16.5px}
@@ -507,19 +498,6 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
       </div>
       <div class="dots" id="stepDots" aria-label="Choose a card"></div>
       <div class="scrollhint" id="stepHint" aria-hidden="true"><span class="sh-n" id="stepCount">1 / 4</span><span class="sh-t">Keep scrolling</span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
-    </div>
-  </div>
-</section>
-
-<section class="block" aria-label="Built to hold" style="padding-top:110px">
-  <div class="wrap">
-    <div class="eyebrow rv">Built to hold</div>
-    <h2 class="big rv d1" style="margin-top:20px;max-width:13em">A lock is only worth something if it <em>keeps its word.</em></h2>
-    <div class="grid4">
-      <div class="rv"><div class="n">01</div><h3>Survives restarts.</h3><p>A running session comes back after a reboot and carries on to its end time.</p></div>
-      <div class="rv d1"><div class="n">02</div><h3>Calls get through.</h3><p>Incoming and emergency calls work in every mode, and alarms still ring.</p></div>
-      <div class="rv d2"><div class="n">03</div><h3>Android keeps count.</h3><p>Daily Limits read usage from Android itself, so nothing resets when you restart.</p></div>
-      <div class="rv d3"><div class="n">04</div><h3>Nothing leaves.</h3><p>No account, no analytics, no ads. Your history lives on your phone only.</p></div>
     </div>
   </div>
 </section>

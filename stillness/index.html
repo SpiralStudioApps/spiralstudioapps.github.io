@@ -134,13 +134,13 @@ body.is-night .endbtn{display:inline-block}
 .app .helper b{color:#B7D7EA;font-weight:500}
 .app .helper em{font-style:normal;color:rgba(183,215,234,.72);white-space:pre}
 .app .helper svg{width:15px;height:15px;margin-left:2px;fill:none;stroke:#B7D7EA;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.app .dial{position:absolute;left:20px;top:345.5px;width:360px;height:360px;touch-action:none;cursor:grab;outline:none}
+.app .dial{position:absolute;left:20px;top:345.5px;width:360px;height:360px;touch-action:pan-y;cursor:grab;outline:none}
 .app .dial:active{cursor:grabbing}
 .app .dial svg,.app .dial canvas{position:absolute;inset:0;width:360px;height:360px;overflow:visible;pointer-events:none}
 .app .dial text{font-family:Roboto,var(--sans);font-size:9.5px;font-weight:500;letter-spacing:.26em;fill:rgba(236,226,218,.32)}
 .app .dial text.on{fill:#B7D7EA;filter:drop-shadow(0 0 3.4px rgba(183,215,234,.45))}
 .app .dial:focus-visible{outline:1px dashed rgba(183,215,234,.4);outline-offset:-30px;border-radius:50%}
-.orb2{position:absolute;left:50%;top:50%;width:160px;height:160px;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0}
+.orb2{position:absolute;left:50%;top:50%;width:160px;height:160px;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;cursor:pointer;touch-action:pan-y;-webkit-tap-highlight-color:transparent;outline:none;padding:0}
 .orb2 .nm{position:absolute;left:50%;top:50%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%) scale(var(--b,1));pointer-events:none}
 .orb2 .num{position:relative;top:8px;font-family:var(--serif);font-weight:400;color:#E8F4FA;white-space:nowrap}
 .orb2 .unit{margin-top:20px;font-family:Roboto,var(--sans);font-size:10px;letter-spacing:4px;font-weight:600;color:rgba(232,244,250,.62);padding-left:4px;line-height:14px}
@@ -280,12 +280,18 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .cta,.chips{justify-content:center}
   #demo{--dh:min(74svh,640px)}
   .modes{height:auto}
-  .modes .pin{position:static;height:auto;display:block;padding:110px 20px 30px}
+  .modes .pin{position:static;height:auto;display:block;padding:100px 0 70px}
   .modes .pin > .device{display:none}
-  .steps{padding-left:0}.steps::before,.steps .bar{display:none}
-  .step{opacity:1;padding:0 0 80px}
-  .step p{max-height:none;opacity:1}
-  .step .device{display:block;height:min(70vh,560px);margin:0 auto 30px}
+  .modes .pin .eyebrow{text-align:center;padding:0 20px}
+  .steps{padding:0 max(9vw,calc(50vw - 190px)) 6px;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .steps::-webkit-scrollbar{display:none}
+  .steps::before,.steps .bar{display:none}
+  .step{flex:0 0 min(82vw,380px);scroll-snap-align:center;padding:0;opacity:.4;text-align:center;transition:opacity .5s}
+  .step.on{opacity:1}
+  .step h3{font-size:27px}
+  .step p{max-height:none;opacity:1;margin:0 auto;font-size:15.5px}
+  .step .device{display:block;height:min(58svh,500px);margin:0 auto 26px}
+  .dots{display:flex!important;justify-content:center;gap:4px;margin-top:22px}
   .life{grid-template-columns:1fr}
   .fan{height:min(64vh,520px)}
   .fan .d1{transform:translate(-100%,-50%) rotate(-8deg) scale(.8)}
@@ -297,7 +303,24 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .plans{grid-template-columns:1fr}
   section.block{padding:100px 0}
 }
-@media (max-width:560px){ .grid4{grid-template-columns:1fr} .wrap{padding:0 20px} nav{padding:16px 20px} }
+@media (max-width:560px){
+  .grid4{grid-template-columns:1fr} .wrap{padding:0 20px} nav{padding:16px 20px}
+  .hero-grid{padding:86px 20px 44px;gap:26px}
+  .h1{margin:14px 0 16px}
+  .hero-grid .lead{font-size:16.5px}
+  .cta{margin-top:20px}
+  .chips{display:none}
+}
+/* steps' dots (phones only) */
+.dots{display:none}
+.dots button{width:26px;height:26px;border:0;background:none;cursor:pointer;display:grid;place-items:center;padding:0}
+.dots button i{width:6px;height:6px;border-radius:50%;background:rgba(233,240,242,.25);transition:background .3s,transform .3s}
+.dots button[aria-current="true"] i{background:var(--accent);transform:scale(1.35)}
+/* phones: a slim Get the app bar once the hero has scrolled away */
+.mcta{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;transform:translate(-50%,140%);display:none;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;background:#E2D0A0;color:#14110A;text-decoration:none;font-weight:500;font-size:15.5px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 26px rgba(226,208,160,.22);transition:transform .5s var(--ease)}
+.mcta small{font-weight:400;opacity:.7;font-size:13px}
+.mcta.show{transform:translate(-50%,0)}
+@media (max-width:900px){ .mcta{display:flex} }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .line-in,.rv{opacity:1;transform:none}
@@ -318,6 +341,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <a class="pill" href="https://play.google.com/store/apps/details?id=com.spiralstudio.stillness">Get the app</a>
   </div>
 </nav>
+<a class="mcta" id="mcta" href="https://play.google.com/store/apps/details?id=com.spiralstudio.stillness" aria-hidden="true" tabindex="-1">Get the app <small>free on Google Play</small></a>
 
 <header class="hero" id="hero">
   <canvas class="sky" id="heroSky" aria-hidden="true"></canvas>
@@ -383,8 +407,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
 </header>
 
 <div class="marquee" aria-hidden="true"><div class="track">
-  <span>No ads, ever</span><span>No account</span><span>No tracking</span><span>Survives restarts</span><span>Calls still get through</span>
-  <span>No ads, ever</span><span>No account</span><span>No tracking</span><span>Survives restarts</span><span>Calls still get through</span>
+  <span>Free to start</span><span>No ads, ever</span><span>No account</span><span>No tracking</span><span>Survives restarts</span><span>Calls still get through</span>
+  <span>Free to start</span><span>No ads, ever</span><span>No account</span><span>No tracking</span><span>Survives restarts</span><span>Calls still get through</span>
 </div></div>
 
 <section class="manifesto" id="manifesto" aria-label="Why Stillness">
@@ -400,7 +424,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
       <img class="shot" src="img/app-schedules.webp" alt="">
     </div></div>
     <div>
-      <div class="eyebrow" style="margin-bottom:26px">Three ways to disconnect</div>
+      <div class="eyebrow" style="margin-bottom:26px">Four ways to disconnect</div>
       <div class="steps" id="steps">
         <span class="bar" id="stepBar"></span>
         <div class="step on"><div class="device"><div class="scr"><img class="shot" src="img/app-lock.webp" alt="Full Lock screen: 2 hours 58 minutes remaining"></div></div><div class="num">01 — FULL LOCK</div><h3>The whole phone goes quiet.</h3><p>Anything from five minutes to a full day. Calls and emergency calls still come through; everything else waits until the time is up. Even a restart won't end it.</p></div>
@@ -408,6 +432,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
         <div class="step"><div class="device"><div class="scr"><img class="shot" src="img/app-limits.webp" alt="Daily Limits: time used today for each app"></div></div><div class="num">03 — DAILY LIMITS</div><h3>Every app gets a bedtime.</h3><p>Give YouTube fifteen minutes a day. When it's spent, the app rests until 4 am. Android counts the time, so a restart can't reset it, and strict mode won't let you loosen a resting limit.</p></div>
         <div class="step"><div class="device"><div class="scr"><img class="shot" src="img/app-schedules.webp" alt="Schedules: morning prayer and family time"></div></div><div class="num">04 — SCHEDULES</div><h3>Rhythms that keep themselves.</h3><p>Morning prayer, family dinner, a calm bedtime. Set the rhythm once and Stillness begins on its own.</p></div>
       </div>
+      <div class="dots" id="stepDots" aria-label="Choose a card"></div>
     </div>
   </div>
 </section>
@@ -599,7 +624,7 @@ const SKY = {
   eclipse(ctx, w, h, t) {
     vgrad(ctx, w, h, [[0, '#141628'], [.55, '#0E101E'], [1, '#090A14']]);
     stars(ctx, w, h, t, { alpha: .5 });
-    const cx = w * (w > h ? .66 : .5), cy = h * .4, r = Math.min(w, h) * .11;
+    const cx = w * (w > h ? .66 : .5), cy = h * (w > h ? .4 : .24), r = Math.min(w, h) * .11;
     blob(ctx, cx, cy, r * 7, 1, 1, [[0, rgba([255, 233, 190], .1)], [.4, rgba([246, 221, 180], .04)], [1, rgba([216, 200, 168], 0)]]);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(cx, cy); ctx.rotate(t * .012);
     for (const s of STREAMERS) {
@@ -729,9 +754,25 @@ const dial = $('#dial'); let dragging = false, hinted = true;
 function stepFrom(e) { const r = dial.getBoundingClientRect(); let a = Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) + Math.PI / 2; a = (a % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI); return Math.round(a / (2 * Math.PI) * (N - 1)); }
 function setIdx(i) { if (i === idx) return; idx = i; render(); if (navigator.vibrate) try { navigator.vibrate(4); } catch (_) {} }
 function hintOff() { if (!hinted) return; hinted = false; $('#holdHint').style.opacity = 0; }
-dial.addEventListener('pointerdown', e => { if (e.target.closest('#orb') || locked || committing) return; dragging = true; try { dial.setPointerCapture(e.pointerId); } catch (_) {} setIdx(stepFrom(e)); hintOff(); });
+// On touch screens the page has to keep scrolling when a thumb swipes across the phone, so a touch
+// only turns the dial once it moves along the ring (or taps it); a swipe heading off the ring scrolls.
+let touch = null;
+dial.addEventListener('pointerdown', e => {
+  if (e.target.closest('#orb') || locked || committing) return;
+  if (e.pointerType === 'touch') { touch = { x: e.clientX, y: e.clientY, mode: 0 }; return; }
+  dragging = true; try { dial.setPointerCapture(e.pointerId); } catch (_) {} setIdx(stepFrom(e)); hintOff();
+});
+dial.addEventListener('touchmove', e => {
+  if (!touch || touch.mode === -1) return;
+  if (touch.mode === 1) { if (e.cancelable) e.preventDefault(); return; }
+  const t = e.touches[0], dx = t.clientX - touch.x, dy = t.clientY - touch.y, r = dial.getBoundingClientRect();
+  const rx = touch.x - (r.left + r.width / 2), ry = touch.y - (r.top + r.height / 2), rl = Math.hypot(rx, ry) || 1;
+  const along = Math.abs(rx * dy - ry * dx) / rl, across = Math.abs(rx * dx + ry * dy) / rl;
+  if (along > across * .9 && e.cancelable) { touch.mode = 1; e.preventDefault(); dragging = true; hintOff(); setIdx(stepFrom(t)); } else touch.mode = -1;
+}, { passive: false });
 dial.addEventListener('pointermove', e => { if (dragging) setIdx(stepFrom(e)); });
-['pointerup', 'pointercancel'].forEach(ev => dial.addEventListener(ev, () => dragging = false));
+dial.addEventListener('pointerup', e => { if (touch && touch.mode === 0 && !locked && !committing) { setIdx(stepFrom(e)); hintOff(); } touch = null; dragging = false; });
+dial.addEventListener('pointercancel', () => { touch = null; dragging = false; });
 dial.addEventListener('keydown', e => {
   if (e.target !== dial) return;
   if (['ArrowRight', 'ArrowUp'].includes(e.key)) { setIdx(Math.min(N - 1, idx + 1)); hintOff(); e.preventDefault(); }
@@ -871,13 +912,18 @@ const mwords = [...mp.querySelectorAll('.w')];
 /* ── modes ──────────────────────────────────────────────────── */
 const modes = $('#modes'), stageImgs = [...document.querySelectorAll('.modes .pin > .device img')], stepEls = [...document.querySelectorAll('.step')], bar = $('#stepBar');
 let curStep = 0;
-function setStep(i) { if (i === curStep) return; curStep = i; stageImgs.forEach((im, k) => im.classList.toggle('on', k === i)); stepEls.forEach((s, k) => s.classList.toggle('on', k === i)); }
+const stepsRow = $('#steps'), dots = $('#stepDots');
+function setStep(i) { if (i === curStep) return; curStep = i; stageImgs.forEach((im, k) => im.classList.toggle('on', k === i)); stepEls.forEach((s, k) => s.classList.toggle('on', k === i)); [...dots.children].forEach((d, k) => d.setAttribute('aria-current', k === i)); }
+// phones: the steps are a swipeable row; the dots follow the swipe and jump to a card
+stepEls.forEach((st, k) => { const d = document.createElement('button'); d.innerHTML = '<i></i>'; d.setAttribute('aria-label', st.querySelector('.num').textContent); d.setAttribute('aria-current', k === 0); d.onclick = () => stepsRow.scrollTo({ left: st.offsetLeft - (stepsRow.clientWidth - st.offsetWidth) / 2, behavior: REDUCE ? 'auto' : 'smooth' }); dots.appendChild(d); });
+stepsRow.addEventListener('scroll', () => { if (innerWidth > 900) return; const mid = stepsRow.scrollLeft + stepsRow.clientWidth / 2; let best = 0, bd = 1e9; stepEls.forEach((st, k) => { const d = Math.abs(st.offsetLeft + st.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = k; } }); setStep(best); }, { passive: true });
 
 /* ── scroll ─────────────────────────────────────────────────── */
-const nav = $('#nav'), manifesto = $('#manifesto'); let lastY = scrollY, ticking = false;
+const nav = $('#nav'), manifesto = $('#manifesto'), mcta = $('#mcta'), heroSec = $('#hero'), finalSec = $('#final'); let lastY = scrollY, ticking = false;
 function onScroll() {
   ticking = false; const y = scrollY, vh = innerHeight;
   nav.classList.toggle('solid', y > vh * .5);
+  const fr = finalSec.getBoundingClientRect(); mcta.classList.toggle('show', y > heroSec.offsetHeight - vh * .2 && fr.top > vh * .8);
   if (y > vh && y > lastY + 4) nav.classList.add('hide'); else if (y < lastY - 4 || y < vh) nav.classList.remove('hide'); lastY = y;
   if (!REDUCE) {
     const mr = manifesto.getBoundingClientRect(); const mpg = clamp((vh * .9 - mr.top) / (mr.height * .75), 0, 1);

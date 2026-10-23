@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -101,62 +101,68 @@ body.is-night .h1 .night{opacity:1;transform:none;filter:none}
 body.is-night .endbtn{display:inline-block}
 .endbtn:hover{border-color:var(--accent)}
 
-/* ── live app replica ── */
-#demo{height:min(78vh,720px)}
-#demo .scr{container-type:size;background:linear-gradient(180deg,#121a24 0%,#0d141c 45%,#0a0f15 100%);user-select:none;-webkit-user-select:none}
-.app{position:absolute;inset:0;font-family:var(--sans);color:#e9f0f2}
-.app .status{position:absolute;top:2.4cqh;left:7cqw;right:7cqw;display:flex;justify-content:space-between;align-items:center;font-size:3.9cqw;font-weight:500}
-.app .status .icons{display:flex;gap:1.6cqw;align-items:center}
-.app .status .bat{border:1px solid rgba(233,240,242,.8);border-radius:1cqw;padding:0 1cqw;font-size:2.8cqw;line-height:1.5}
-.app .topbar{position:absolute;top:6.3cqh;left:6cqw;right:6cqw;display:flex;justify-content:space-between;align-items:center}
-.app .topbar svg{width:5.6cqw;height:5.6cqw;stroke:rgba(233,240,242,.62);fill:none;stroke-width:1.6}
-.app .week{display:flex;gap:4.1cqw;font-size:3.6cqw;font-weight:600;letter-spacing:.02em;color:rgba(233,240,242,.88)}
-.app .week span{position:relative}
-.app .week span.today::after{content:"";position:absolute;left:50%;bottom:-1.6cqw;width:2.6cqw;height:1px;transform:translateX(-50%);background:rgba(233,240,242,.8)}
-.app .lefticons{display:flex;gap:4.4cqw}
-.app .title{position:absolute;top:15.2cqh;left:0;right:0;text-align:center;font-family:var(--serif);font-size:10.2cqw;font-weight:500;line-height:1.1;transition:color .5s}
-.app .sub{position:absolute;top:21.1cqh;left:0;right:0;text-align:center;font-family:var(--serif);font-style:italic;font-size:3.9cqw;color:rgba(233,240,242,.5)}
-.app .toggle{position:absolute;top:24.7cqh;left:25.5cqw;width:49cqw;height:4.4cqh;border:1px solid rgba(233,240,242,.14);border-radius:999px;display:flex;padding:.5cqh .9cqw}
-.app .toggle button{flex:1;border:0;background:none;border-radius:999px;font-family:var(--serif);font-size:3.9cqw;color:rgba(233,240,242,.42);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:1.6cqw;transition:background .4s,color .4s}
-.app .toggle button.on{background:rgba(233,240,242,.07);color:#e9f0f2}
-.app .toggle button.on::before{content:"";width:1.5cqw;height:1.5cqw;border-radius:50%;background:var(--accent);box-shadow:0 0 2cqw var(--accent)}
-.app .subline{position:absolute;top:30.1cqh;left:0;right:0;text-align:center;font-size:3.2cqw;color:rgba(233,240,242,.56)}
-.app .subline b{color:var(--accent-light);font-weight:600}
-.app .dial{position:absolute;left:6cqw;top:38cqh;width:88cqw;height:88cqw;touch-action:none;cursor:grab;outline:none}
+/* ── live app replica ──
+   Built at the phone's real size (400 × 889 dp) straight from the app's
+   Compose code (HomeScreen, RadialDial, BreathingOrb, LockScreen), then
+   scaled to the frame, so every px below is a dp/sp value from the app. */
+#demo{--dh:min(78vh,720px);height:var(--dh);width:calc(var(--dh) * .4611);aspect-ratio:auto;padding:calc(var(--dh) * .01014)}
+#demo .scr{background:#0A1118;user-select:none;-webkit-user-select:none}
+.app,.lk{position:absolute;left:0;top:0;width:400px;height:889px;transform-origin:0 0;transform:scale(var(--k,1));font-family:Roboto,var(--sans);color:#E9F0F2;-webkit-font-smoothing:antialiased}
+/* ritualCanvas: radial from top-centre, radius hypot(.7w, h) = 932 */
+.app{background:radial-gradient(932px circle at 50% 0,#101C26 0,#0C141C 513px,#0A1118 932px)}
+.app .sb{position:absolute;top:12px;left:29px;right:28px;height:18px;display:flex;justify-content:space-between;align-items:center}
+.app .sb .t{font-size:16.5px;font-weight:500;color:#E6E9EB;letter-spacing:.1px}
+.app .sb .ic{display:flex;align-items:center;gap:4px}
+.app .sb .bat{display:flex;align-items:center;gap:1px}
+.app .sb .bat b{background:#F1F3F4;color:#111;border-radius:5px;font-size:10.5px;font-weight:700;line-height:13px;padding:0 4px;min-width:21px;text-align:center}
+.app .sb .bat i{width:1.6px;height:5px;background:rgba(241,243,244,.55);border-radius:0 1px 1px 0}
+.app .gl{position:absolute;top:58px;width:18px;height:18px;fill:none;stroke:#8FA0AF;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.app .week{position:absolute;top:58px;left:0;right:0;display:flex;justify-content:center;gap:13px;font-size:11px;font-weight:600;line-height:18px}
+.app .week span{color:rgba(214,226,237,.28);position:relative}
+.app .week span.held{color:#D6E2ED}
+.app .week span.today{color:#fff}
+.app .week span.today::after{content:"";position:absolute;left:0;right:0;top:21.5px;height:1px;background:#C9D9E7}
+.app .title{position:absolute;top:143.6px;left:0;right:0;text-align:center;font-family:var(--serif);font-size:32px;font-weight:500;line-height:38px;color:#DEEBF4}
+.app .sub{position:absolute;top:186px;left:0;right:0;text-align:center;font-family:var(--serif);font-style:italic;font-size:13.5px;line-height:20px;color:rgba(196,220,236,.6)}
+.app .cap{position:absolute;top:221px;left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:3px;border:1px solid rgba(233,240,242,.13);border-radius:999px}
+.app .cap button{display:flex;align-items:center;border:0;border-radius:999px;background:transparent;padding:6px 16px;font-family:var(--serif);font-size:14.5px;line-height:17px;color:rgba(233,240,242,.38);cursor:pointer;white-space:nowrap;transition:background .18s,color .18s;-webkit-tap-highlight-color:transparent}
+.app .cap button.on{background:rgba(183,215,234,.13);color:#DEEBF4}
+.app .cap button .dot{display:none;width:11px;height:11px;margin-right:4px;border-radius:50%;background:radial-gradient(circle,#B7D7EA 0 2.5px,rgba(183,215,234,.55) 2.5px,rgba(183,215,234,0) 5.5px)}
+.app .cap button.on .dot{display:block}
+.app .helper{position:absolute;top:266px;left:0;right:0;height:18px;display:flex;justify-content:center;align-items:center;font-size:11.5px;letter-spacing:.1px;color:rgba(233,240,242,.45);cursor:pointer}
+.app .helper b{color:#B7D7EA;font-weight:500}
+.app .helper em{font-style:normal;color:rgba(183,215,234,.72);white-space:pre}
+.app .helper svg{width:15px;height:15px;margin-left:2px;fill:none;stroke:#B7D7EA;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.app .dial{position:absolute;left:20px;top:345.5px;width:360px;height:360px;touch-action:none;cursor:grab;outline:none}
 .app .dial:active{cursor:grabbing}
-.app .dial svg{width:100%;height:100%;overflow:visible}
-.app .dial .tick{stroke:rgba(233,240,242,.22);stroke-linecap:round}
-.app .dial .tick.lit{stroke:var(--accent)}
-.app .dial text{font-family:var(--sans);font-size:5.1px;letter-spacing:1.8px;fill:rgba(233,240,242,.4);font-weight:500}
-.app .dial text.on{fill:var(--accent);filter:drop-shadow(0 0 2px var(--accent))}
-.app .dial .knob{fill:var(--accent);filter:drop-shadow(0 0 3px var(--accent))}
-.app .dial .hp{fill:none;stroke:var(--accent);stroke-width:.9;stroke-linecap:round}
-.app .dial:focus-visible .knob{stroke:#fff;stroke-width:.6}
-.orb2{position:absolute;left:30cqw;top:calc(38cqh + 24cqw);width:40cqw;height:40cqw;border-radius:50%;border:0;cursor:pointer;
-  background:radial-gradient(circle at 34% 24%,#a6c4d8 0%,#6a91b0 18%,#356082 45%,#1a4060 74%,#112d48 100%);
-  box-shadow:0 0 14cqw rgba(110,160,200,.22),inset -3cqw -4cqw 8cqw rgba(0,0,0,.25);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .6s var(--ease),filter 1s;-webkit-tap-highlight-color:transparent;touch-action:none}
-.orb2.holding{transform:scale(.95)}
-.orb2 .num{font-family:var(--serif);font-size:15cqw;line-height:1;color:#f1f6f8}
-.orb2 .unit{font-size:3.3cqw;letter-spacing:.32em;color:rgba(233,240,242,.72);margin-top:2.4cqw;font-weight:600;padding-left:.32em}
-.app .tabs{position:absolute;bottom:3.6cqh;left:0;right:0;display:flex;justify-content:space-around;font-family:var(--serif);font-size:4.8cqw}
-.app .tabs span{color:rgba(233,240,242,.42);position:relative}
-.app .tabs span.on{color:#e9f0f2}
-.app .tabs span.on::after{content:"";position:absolute;left:50%;bottom:-1.3cqh;width:6cqw;height:2px;transform:translateX(-50%);background:var(--accent)}
-.app .homebar{position:absolute;bottom:1.1cqh;left:33cqw;width:34cqw;height:.45cqh;border-radius:9px;background:rgba(233,240,242,.55)}
-.hold-hint{position:absolute;left:0;right:0;top:calc(38cqh + 88cqw + 1.2cqh);text-align:center;font-size:2.9cqw;letter-spacing:.3em;text-transform:uppercase;color:rgba(233,240,242,.55);transition:opacity .5s}
+.app .dial svg,.app .dial canvas{position:absolute;inset:0;width:360px;height:360px;overflow:visible;pointer-events:none}
+.app .dial text{font-family:Roboto,var(--sans);font-size:9.5px;font-weight:500;letter-spacing:.26em;fill:rgba(236,226,218,.32)}
+.app .dial text.on{fill:#B7D7EA;filter:drop-shadow(0 0 3.4px rgba(183,215,234,.45))}
+.app .dial:focus-visible{outline:1px dashed rgba(183,215,234,.4);outline-offset:-30px;border-radius:50%}
+.orb2{position:absolute;left:50%;top:50%;width:160px;height:160px;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;outline:none;padding:0}
+.orb2 .nm{position:absolute;left:50%;top:50%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%) scale(var(--b,1));pointer-events:none}
+.orb2 .num{position:relative;top:8px;font-family:var(--serif);font-weight:400;color:#E8F4FA;white-space:nowrap}
+.orb2 .unit{margin-top:20px;font-family:Roboto,var(--sans);font-size:10px;letter-spacing:4px;font-weight:600;color:rgba(232,244,250,.62);padding-left:4px;line-height:14px}
+.app .whisper{position:absolute;top:707px;left:0;right:0;height:18px;line-height:18px;text-align:center;font-size:10.5px;letter-spacing:1.5px;color:rgba(222,232,234,.35);transition:opacity .4s}
+.app .tabs{position:absolute;left:0;right:0;top:824px;display:flex}
+.app .tabs span{flex:1;display:flex;flex-direction:column;align-items:center;font-family:var(--serif);font-size:17px;letter-spacing:.1px;line-height:23px;color:rgba(226,236,238,.35)}
+.app .tabs span i{display:block;width:0;height:2px;margin-top:5px;background:#B7D7EA}
+.app .tabs span.on{color:#DEEBF4}
+.app .tabs span.on i{width:22px}
+.app .homebar,.lk .homebar{position:absolute;top:880.5px;left:130px;width:140px;height:3.5px;border-radius:9px;background:#A8ACAF}
 /* lock screen inside the replica */
 .lockscr{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity 1.3s var(--ease)}
 .lockscr canvas{position:absolute;inset:0;width:100%;height:100%}
 body.is-night .lockscr{opacity:1;pointer-events:auto}
-.lockscr .top{position:absolute;top:5.5cqh;left:0;right:0;text-align:center;font-size:3.4cqw;color:rgba(233,240,242,.62)}
-.lockscr .count{position:absolute;top:37cqh;left:0;right:0;display:flex;justify-content:center;align-items:flex-start;gap:7cqw}
-.lockscr .count div{text-align:center}
-.lockscr .count .n{font-family:var(--serif);font-size:19cqw;line-height:1}
-.lockscr .count .l{font-size:3cqw;letter-spacing:.32em;color:rgba(233,240,242,.62);margin-top:3cqw;padding-left:.32em}
-.lockscr .count .sep{width:1.3cqw;height:1.3cqw;border-radius:50%;background:rgba(233,240,242,.5);margin-top:4cqw}
-.lockscr .rem{position:absolute;top:58cqh;left:0;right:0;text-align:center;font-size:3.6cqw;color:rgba(233,240,242,.6)}
-.lockscr .em{position:absolute;bottom:6cqh;left:0;right:0;text-align:center;font-size:3.6cqw;color:rgba(233,240,242,.55)}
+.lk .top{position:absolute;top:64px;left:24px;right:24px;text-align:center;font-size:12.5px;letter-spacing:.2px;line-height:17px;color:rgba(238,243,245,.55)}
+.lk .count{position:absolute;top:385px;left:0;right:0;display:flex;flex-direction:column;align-items:center}
+.lk .row{display:flex;align-items:flex-start;justify-content:center}
+.lk .col{display:flex;flex-direction:column;align-items:center}
+.lk .n{font-family:var(--serif);font-size:78px;line-height:78px;color:#EEF3F5}
+.lk .l{margin-top:12px;font-size:10px;font-weight:500;letter-spacing:3px;padding-left:3px;line-height:14px;color:rgba(238,243,245,.55)}
+.lk .dotsep{font-family:var(--serif);font-size:30px;line-height:30px;padding:24px 16px;color:rgba(238,243,245,.28)}
+.lk .rem{margin-top:14px;font-size:13px;letter-spacing:.3px;line-height:18px;color:rgba(238,243,245,.45)}
+.lk .em{position:absolute;top:822px;left:0;right:0;text-align:center;font-size:15px;line-height:20px;color:rgba(238,243,245,.55)}
 
 /* ── marquee ── */
 .marquee{border-block:1px solid var(--line);overflow:hidden;padding:24px 0;white-space:nowrap}
@@ -316,41 +322,40 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     </div>
     <div class="demo-col">
       <div class="device" id="demo">
-        <div class="scr">
+        <div class="scr" id="scr">
           <div class="app" id="app">
-            <div class="status"><span id="clock">3:24</span><span class="icons">
-              <svg width="14" height="10" viewBox="0 0 14 10" fill="rgba(233,240,242,.9)"><rect x="0" y="7" width="2.4" height="3" rx=".5"/><rect x="3.8" y="5" width="2.4" height="5" rx=".5"/><rect x="7.6" y="2.6" width="2.4" height="7.4" rx=".5"/><rect x="11.4" y="0" width="2.4" height="10" rx=".5" opacity=".35"/></svg>
-              <span class="bat">86</span></span></div>
-            <div class="topbar">
-              <div class="lefticons">
-                <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
-                <svg viewBox="0 0 24 24"><path d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9"/></svg>
-              </div>
-              <div class="week" id="week"></div>
-              <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h10M18 17h2"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="16" cy="17" r="2"/></svg>
-            </div>
+            <div class="sb"><span class="t" id="clock">3:24</span><span class="ic">
+              <svg width="17" height="13" viewBox="0 0 17 13"><rect x="0" y="9" width="3" height="4" rx=".8" fill="#E6E9EB"/><rect x="4.6" y="6" width="3" height="7" rx=".8" fill="#E6E9EB"/><rect x="9.2" y="3" width="3" height="10" rx=".8" fill="#E6E9EB"/><rect x="13.8" y="0" width="3" height="13" rx=".8" fill="#E6E9EB" opacity=".35"/></svg>
+              <svg width="18" height="13" viewBox="0 0 18 13"><path d="M9 12.6 0.6 4.1a12 12 0 0 1 16.8 0Z" fill="#E6E9EB"/></svg>
+              <span class="bat"><b>86</b><i></i></span></span></div>
+            <svg class="gl" style="left:23px" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="4"/><path d="M3 9.5h18M8 2.5V6M16 2.5V6"/></svg>
+            <svg class="gl" style="left:61px" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h11M6.5 20.5h11M7.8 3.5 10.8 12 7.8 20.5M16.2 3.5 13.2 12 16.2 20.5"/><circle cx="12" cy="17" r="1.1" fill="#8FA0AF" stroke="none"/></svg>
+            <div class="week" id="week"></div>
+            <svg class="gl" style="left:359px" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h8.8M17.2 6H20M4 12h2.8M11.2 12H20M4 18h10.3M18.7 18H20"/><circle cx="15" cy="6" r="2.2"/><circle cx="9" cy="12" r="2.2"/><circle cx="16.5" cy="18" r="2.2"/></svg>
             <div class="title" id="aTitle">Focus</div>
             <div class="sub">6 days this week</div>
-            <div class="toggle" role="radiogroup" aria-label="Lock mode">
-              <button id="mFull" role="radio" aria-checked="false">Full lock</button>
-              <button id="mSel" role="radio" aria-checked="true" class="on">Selective</button>
+            <div class="cap" role="radiogroup" aria-label="Lock mode">
+              <button id="mFull" role="radio" aria-checked="false"><i class="dot"></i>Full lock</button>
+              <button id="mSel" role="radio" aria-checked="true" class="on"><i class="dot"></i>Selective</button>
             </div>
-            <div class="subline" id="subline"><b>47 apps</b> quieted ›</div>
+            <div class="helper" id="helper"></div>
             <div class="dial" id="dial" tabindex="0" role="slider" aria-label="Lock length" aria-valuetext="45 minutes">
-              <svg viewBox="0 0 200 200" id="dialSvg" aria-hidden="true"></svg>
+              <svg viewBox="0 0 360 360" id="dialSvg" aria-hidden="true"></svg>
+              <canvas id="orbCv" aria-hidden="true"></canvas>
+              <button class="orb2" id="orb" aria-label="Press and hold to begin the lock"><span class="nm" id="oNm"><span class="num" id="oNum">45</span><span class="unit" id="oUnit">MIN</span></span></button>
             </div>
-            <button class="orb2" id="orb" aria-label="Press and hold to begin the lock"><span class="num" id="oNum">45</span><span class="unit" id="oUnit">MIN</span></button>
-            <div class="hold-hint" id="holdHint">Drag the dial · hold the orb</div>
-            <div class="tabs"><span class="on">Still</span><span>Life</span></div>
+            <div class="whisper" id="holdHint">hold to begin</div>
+            <div class="tabs"><span class="on">Still<i></i></span><span>Life<i></i></span></div>
             <div class="homebar"></div>
           </div>
           <div class="lockscr" id="lockscr" aria-live="polite">
             <canvas id="lockSky" aria-hidden="true"></canvas>
-            <div class="top" id="lTop">Full Lock · until 2:54 AM</div>
-            <div class="count"><div><div class="n" id="lH">0</div><div class="l" id="lHl">HOURS</div></div><span class="sep"></span><div><div class="n" id="lM">45</div><div class="l">MINUTES</div></div></div>
-            <div class="rem">remaining</div>
-            <div class="em">Emergency</div>
-            <div class="homebar" style="position:absolute;bottom:1.1cqh;left:33cqw;width:34cqw;height:.45cqh;border-radius:9px;background:rgba(233,240,242,.55)"></div>
+            <div class="lk">
+              <div class="top" id="lTop">Full Lock · 45 minutes · 2:54 AM</div>
+              <div class="count"><div class="row" id="lRow"></div><div class="rem">remaining</div></div>
+              <div class="em">Emergency</div>
+              <div class="homebar"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -619,102 +624,205 @@ const heroSky = runner($('#heroSky'), (ctx, w, h, t) => {
 const lockSky = runner($('#lockSky'), (ctx, w, h, t) => { if (document.body.classList.contains('is-night')) SKY.ocean(ctx, w, h, t); });
 
 /* ── live app replica ────────────────────────────────────────── */
-const BANDS = [['Breath', [5, 10, 15, 20, 30]], ['Focus', [35, 45, 50, 60]], ['Presence', [75, 90, 105, 120]], ['Retreat', [150, 180, 240, 300, 360]], ['Rest', [420, 480, 540, 600, 720]], ['Solitude', [840, 960, 1080, 1200, 1440]]];
-const SPAN = 55, STOPS = [];
-BANDS.forEach(([name, vals], b) => vals.forEach((m, i) => STOPS.push({ a: b * SPAN + (i + .5) * SPAN / vals.length, m, b })));
-let idx = STOPS.findIndex(s => s.m === 45), mode = 'sel';
-const svg = $('#dialSvg'), NS = 'http://www.w3.org/2000/svg';
-const pt = (a, r) => { const rad = (a - 90) * Math.PI / 180; return [100 + Math.cos(rad) * r, 100 + Math.sin(rad) * r]; };
-const ticks = [];
-for (let a = 0; a <= 330; a += 7.5) {
-  const long = a % SPAN < .01 || Math.abs(a % SPAN - SPAN) < .01;
-  const [x1, y1] = pt(a, long ? 63 : 65.5), [x2, y2] = pt(a, long ? 72 : 70);
-  const l = document.createElementNS(NS, 'line'); l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2);
-  l.setAttribute('class', 'tick'); l.setAttribute('stroke-width', long ? 1.1 : .7); l.dataset.a = a; svg.appendChild(l); ticks.push(l);
-}
-const labels = BANDS.map(([name], b) => {
-  const c = b * SPAN + SPAN / 2, bottom = c > 100 && c < 260, R = bottom ? 87 : 83, half = 34;
-  const [sx, sy] = pt(bottom ? c + half : c - half, R), [ex, ey] = pt(bottom ? c - half : c + half, R);
-  const p = document.createElementNS(NS, 'path'); p.setAttribute('id', 'lp' + b); p.setAttribute('fill', 'none');
-  p.setAttribute('d', `M${sx},${sy} A${R},${R} 0 0 ${bottom ? 0 : 1} ${ex},${ey}`); svg.appendChild(p);
-  const tx = document.createElementNS(NS, 'text'); const tp = document.createElementNS(NS, 'textPath');
-  tp.setAttribute('href', '#lp' + b); tp.setAttribute('startOffset', '50%'); tp.setAttribute('text-anchor', 'middle'); tp.textContent = name.toUpperCase();
-  tx.appendChild(tp); svg.appendChild(tx); return tx;
-});
-const prog = document.createElementNS(NS, 'circle'); prog.setAttribute('cx', 100); prog.setAttribute('cy', 100); prog.setAttribute('r', 49.5); prog.setAttribute('class', 'hp'); prog.setAttribute('transform', 'rotate(-90 100 100)');
-const PC = 2 * Math.PI * 49.5; prog.style.strokeDasharray = PC; prog.style.strokeDashoffset = PC; svg.appendChild(prog);
-const knob = document.createElementNS(NS, 'circle'); knob.setAttribute('r', 2.6); knob.setAttribute('class', 'knob'); svg.appendChild(knob);
+// Mirrors the app's code: DURATION_STEPS + bands (SessionIntent.kt), RadialDial.kt,
+// BreathingOrb.kt (nightfall hold), Ritual.kt (Ocean sky sphere) and LockScreen.kt.
+const STEPS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 60, 75, 90, 105, 120, 180, 240, 300, 360, 480, 540, 600, 660, 720, 960, 1080, 1200, 1320, 1440];
+// [name, max minutes, hueShift, holdMillis]
+const BANDS = [['Breath', 15, 0, 600], ['Focus', 45, 10, 900], ['Presence', 120, 25, 1200], ['Retreat', 360, 45, 1500], ['Rest', 720, 70, 1800], ['Solitude', 1440, 95, 2200]];
+const bandOf = m => BANDS.findIndex(b => m <= b[1]);
+const N = STEPS.length, ACC = [183, 215, 234]; // Ocean accent #B7D7EA
+let idx = STEPS.indexOf(45), mode = 'sel';
 
-const fmt = m => m < 60 ? [String(m), 'MIN'] : m % 60 === 0 ? [String(m / 60), m === 60 ? 'HOUR' : 'HOURS'] : [`${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`, 'HRS'];
-const words = m => m < 60 ? `${m} minutes` : m % 60 ? `${Math.floor(m / 60)} hours ${m % 60} minutes` : `${m / 60} hour${m === 60 ? '' : 's'}`;
+// tintForMode: OkLab mix of the accent toward WarmTintTarget #E8B87A by hueShift/240
+const lin = c => (c /= 255) <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
+const gam = c => 255 * clamp(c <= .0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - .055, 0, 1);
+function oklab([r, g, b]) {
+  [r, g, b] = [lin(r), lin(g), lin(b)];
+  const l = Math.cbrt(.4122214708 * r + .5363325363 * g + .0514459929 * b), m = Math.cbrt(.2119034982 * r + .6806995451 * g + .1073969566 * b), s = Math.cbrt(.0883024619 * r + .2817188376 * g + .6299787005 * b);
+  return [.2104542553 * l + .793617785 * m - .0040720468 * s, 1.9779984951 * l - 2.428592205 * m + .4505937099 * s, .0259040371 * l + .7827717662 * m - .808675766 * s];
+}
+function rgbOf([L, a, b]) {
+  const l = (L + .3963377774 * a + .2158037573 * b) ** 3, m = (L - .1055613458 * a - .0638541728 * b) ** 3, s = (L - .0894841775 * a - 1.291485548 * b) ** 3;
+  return [gam(4.0767416621 * l - 3.3077115913 * m + .2309699292 * s), gam(-1.2684380046 * l + 2.6097574011 * m - .3413193965 * s), gam(-.0041960863 * l - .7034186147 * m + 1.707614701 * s)];
+}
+const TINT = BANDS.map(([, , shift]) => { const A = oklab(ACC), W = oklab([232, 184, 122]), t = shift / 240; return rgbOf(A.map((v, i) => v + (W[i] - v) * t)).map(Math.round); });
+
+// dial: 28 ticks round the full circle, curved band labels outside
+const svg = $('#dialSvg'), NS = 'http://www.w3.org/2000/svg', C0 = 180, RING = 360 * .342, LABEL_R = RING + 25;
+const mk = (tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); svg.appendChild(e); return e; };
+const ticks = STEPS.map((m, i) => {
+  const th = i / N * 2 * Math.PI - Math.PI / 2, start = i === 0 || bandOf(STEPS[i - 1]) !== bandOf(m), len = start ? 12 : 6;
+  return mk('line', { x1: C0 + Math.cos(th) * RING, y1: C0 + Math.sin(th) * RING, x2: C0 + Math.cos(th) * (RING + len), y2: C0 + Math.sin(th) * (RING + len), 'stroke-width': start ? 1.6 : 1, 'stroke-linecap': 'round' });
+});
+const labels = BANDS.map(([name], b) => {
+  const ids = STEPS.map((m, i) => bandOf(m) === b ? i : -1).filter(i => i >= 0), mid = (ids[0] + ids[ids.length - 1] + 1) / 2;
+  const th = mid / N * 2 * Math.PI - Math.PI / 2, lower = th > 0 && th < Math.PI;
+  // the visual centre of the caps sits on LABEL_R; the baseline moves half a cap height out (top) or in (bottom)
+  const r = LABEL_R + (lower ? 3.2 : -3.2), half = 1.2, a0 = lower ? th + half : th - half, a1 = lower ? th - half : th + half;
+  mk('path', { id: 'lp' + b, fill: 'none', d: `M${C0 + Math.cos(a0) * r},${C0 + Math.sin(a0) * r} A${r},${r} 0 0 ${lower ? 0 : 1} ${C0 + Math.cos(a1) * r},${C0 + Math.sin(a1) * r}` });
+  const tx = mk('text', {}), tp = document.createElementNS(NS, 'textPath');
+  tp.setAttribute('href', '#lp' + b); tp.setAttribute('startOffset', '50%'); tp.setAttribute('text-anchor', 'middle'); tp.textContent = name.toUpperCase();
+  tx.appendChild(tp); return tx;
+});
+
+// duration text, exactly as formatBigDuration / the lock screen word it
+const big = m => m < 60 ? [String(m), 'MIN'] : m % 60 === 0 ? [String(m / 60), m === 60 ? 'HOUR' : 'HOURS'] : [`${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`, 'HRS'];
+const total = m => m >= 120 ? `${Math.floor(m / 60)} hours` : m >= 60 ? (m % 60 ? `1 hour ${m % 60} min` : '1 hour') : `${m} minutes`;
+const sizeFactor = i => .95 + .5 * i / (N - 1), numScale = i => .96 + .12 * i / (N - 1);
+const BASE = 360 * 146 / 368;
+let orbD = BASE * sizeFactor(idx), orbFrom = orbD, orbTo = orbD, orbT0 = 0;
 function render() {
-  const s = STOPS[idx], [n, u] = fmt(s.m);
-  $('#oNum').textContent = n; $('#oUnit').textContent = u; $('#aTitle').textContent = BANDS[s.b][0];
-  ticks.forEach(t => t.classList.toggle('lit', +t.dataset.a <= s.a + .01));
-  labels.forEach((l, b) => l.classList.toggle('on', b === s.b));
-  const [kx, ky] = pt(s.a, 67.5); knob.setAttribute('cx', kx); knob.setAttribute('cy', ky);
-  $('#dial').setAttribute('aria-valuetext', words(s.m));
+  const m = STEPS[idx], b = bandOf(m), [n, u] = big(m);
+  $('#oNum').textContent = n; $('#oUnit').textContent = u; $('#aTitle').textContent = BANDS[b][0];
+  $('#oNum').style.fontSize = $('#oNum').style.lineHeight = (n.includes(':') ? 44 : n.length >= 3 ? 50 : 58) * numScale(idx) + 'px';
+  ticks.forEach((t, i) => { const on = i <= idx, c = on ? TINT[bandOf(STEPS[i])] : [42, 54, 69]; t.setAttribute('stroke', `rgba(${c},${on ? .95 : .45})`); });
+  labels.forEach((l, i) => l.classList.toggle('on', i === b));
+  orbFrom = orbD; orbTo = BASE * sizeFactor(idx); orbT0 = performance.now(); wake();
+  $('#dial').setAttribute('aria-valuetext', total(m).replace(' min', ' minutes'));
 }
 function setMode(m) {
   mode = m; $('#mFull').classList.toggle('on', m === 'full'); $('#mSel').classList.toggle('on', m === 'sel');
   $('#mFull').setAttribute('aria-checked', m === 'full'); $('#mSel').setAttribute('aria-checked', m === 'sel');
-  $('#subline').innerHTML = m === 'full' ? 'only calls go through' : '<b>47 apps</b> quieted ›';
+  $('#helper').innerHTML = m === 'full' ? 'only calls go through' : '<b>47 apps</b><em> quieted</em><svg viewBox="0 0 24 24"><path d="m9.5 7 5 5-5 5"/></svg>';
 }
 $('#mFull').onclick = () => setMode('full'); $('#mSel').onclick = () => setMode('sel');
-render();
 
-// dragging the dial
-const dial = $('#dial'); let dragging = false;
-function angleFrom(e) { const r = dial.getBoundingClientRect(); const x = e.clientX - (r.left + r.width / 2), y = e.clientY - (r.top + r.height / 2); return (Math.atan2(y, x) * 180 / Math.PI + 90 + 360) % 360; }
-function nearest(a) { if (a > 330) a = a > 345 ? 0 : 330; let best = 0, bd = 1e9; STOPS.forEach((s, i) => { const d = Math.abs(s.a - a); if (d < bd) { bd = d; best = i; } }); return best; }
-dial.addEventListener('pointerdown', e => { dragging = true; try { dial.setPointerCapture(e.pointerId); } catch (_) {} idx = nearest(angleFrom(e)); render(); hintOff(); });
-dial.addEventListener('pointermove', e => { if (!dragging) return; const i = nearest(angleFrom(e)); if (i !== idx) { idx = i; render(); if (navigator.vibrate) try { navigator.vibrate(4); } catch (_) {} } });
+// dragging the dial: angle from 12 o'clock, snapped with round(t × (28 − 1)) like the app
+const dial = $('#dial'); let dragging = false, hinted = true;
+function stepFrom(e) { const r = dial.getBoundingClientRect(); let a = Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) + Math.PI / 2; a = (a % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI); return Math.round(a / (2 * Math.PI) * (N - 1)); }
+function setIdx(i) { if (i === idx) return; idx = i; render(); if (navigator.vibrate) try { navigator.vibrate(4); } catch (_) {} }
+function hintOff() { if (!hinted) return; hinted = false; $('#holdHint').style.opacity = 0; }
+dial.addEventListener('pointerdown', e => { if (e.target.closest('#orb') || locked || committing) return; dragging = true; try { dial.setPointerCapture(e.pointerId); } catch (_) {} setIdx(stepFrom(e)); hintOff(); });
+dial.addEventListener('pointermove', e => { if (dragging) setIdx(stepFrom(e)); });
 ['pointerup', 'pointercancel'].forEach(ev => dial.addEventListener(ev, () => dragging = false));
-dial.addEventListener('keydown', e => { if (['ArrowRight', 'ArrowUp'].includes(e.key)) { idx = Math.min(STOPS.length - 1, idx + 1); render(); e.preventDefault(); } if (['ArrowLeft', 'ArrowDown'].includes(e.key)) { idx = Math.max(0, idx - 1); render(); e.preventDefault(); } });
-function hintOff() { $('#holdHint').style.opacity = .35; }
+dial.addEventListener('keydown', e => {
+  if (e.target !== dial) return;
+  if (['ArrowRight', 'ArrowUp'].includes(e.key)) { setIdx(Math.min(N - 1, idx + 1)); hintOff(); e.preventDefault(); }
+  if (['ArrowLeft', 'ArrowDown'].includes(e.key)) { setIdx(Math.max(0, idx - 1)); hintOff(); e.preventDefault(); }
+});
 
-// press and hold the orb
-const orb = $('#orb'), HOLD = 1500; let p = 0, holding = false, locked = false, rafH = 0, endAt = 0, tickT = 0, holdT = 0, mark = 0, pAtMark = 0;
-// progress is driven by the clock, not by frame count, so a throttled tab still completes on time
-function step() {
-  const el = performance.now() - mark;
-  p = holding ? clamp(pAtMark + el / HOLD, 0, 1) : clamp(pAtMark - el / (HOLD * .5), 0, 1);
-  prog.style.strokeDashoffset = PC * (1 - p);
-  if (!locked && (holding || p > 0)) rafH = requestAnimationFrame(step);
+// the orb: Ocean sky sphere (day ↔ night), idle breathing, nightfall hold, seal ring, arc, bloom
+const cv = $('#orbCv'), cx = cv.getContext('2d'), offA = document.createElement('canvas'), offB = document.createElement('canvas');
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+// [cx, cy, r, stops[pos, '#rrggbb', alpha]]; Compose's Transparent is transparent black, interpolated unpremultiplied
+const SPHERE = {
+  day: { layers: [[.36, .30, .95, [[0, '#2C5A78', 1], [.48, '#1B4058', 1], [.80, '#0F2A40', 1], [1, '#0A1C2E', 1]]], [.34, .24, .98, [[0, '#E2F4FE', .502], [.38, '#B4D6EC', .122], [.62, '#000000', 0]]]], lit: ['#B2DAF2', .102], limb: ['#030A12', .6] },
+  night: { layers: [[.40, .32, .95, [[0, '#16344C', 1], [.46, '#0E2338', 1], [.78, '#08182A', 1], [1, '#050F1C', 1]]], [.30, .24, .90, [[0, '#B7D7EA', .102], [.44, '#000000', 0]]]], lit: ['#A6C8E4', .078], limb: ['#030810', .7] },
+};
+function grad(ctx, x, y, r, stops) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  for (let s = 0; s < stops.length; s++) {
+    const [p0, h0, a0] = stops[s], c0 = hex(h0); g.addColorStop(p0, rgba(c0, a0));
+    if (s + 1 < stops.length) { const [p1, h1, a1] = stops[s + 1], c1 = hex(h1); for (let k = 1; k < 8; k++) { const f = k / 8; g.addColorStop(p0 + (p1 - p0) * f, rgba(c0.map((v, j) => Math.round(v + (c1[j] - v) * f)), a0 + (a1 - a0) * f)); } }
+  }
+  return g;
 }
+function sphere(ctx, spec, d, stars) {
+  ctx.clearRect(0, 0, d, d); ctx.save(); ctx.beginPath(); ctx.arc(d / 2, d / 2, d / 2, 0, 7); ctx.clip();
+  for (const [x, y, r, st] of spec.layers) { ctx.fillStyle = grad(ctx, x * d, y * d, r * d, st); ctx.fillRect(0, 0, d, d); }
+  ctx.fillStyle = grad(ctx, .34 * d, .28 * d, 1.12 * d, [[0, '#000000', 0], [.7, '#000000', 0], [1, spec.limb[0], spec.limb[1]]]); ctx.fillRect(0, 0, d, d);
+  ctx.fillStyle = grad(ctx, .22 * d, .16 * d, .75 * d, [[0, spec.lit[0], spec.lit[1]], [.55, '#000000', 0], [1, '#000000', 0]]); ctx.fillRect(0, 0, d, d);
+  if (stars) for (const [sx, sy, sr, sa] of [[.40, .34, 1.2, .9], [.62, .48, 1.0, .7], [.52, .66, 1.0, .6], [.30, .56, 1.0, .55], [.70, .30, 1.1, .7], [.44, .22, .9, .5], [.24, .44, .9, .5]]) {
+    ctx.fillStyle = `rgba(240,244,255,${sa})`; ctx.beginPath(); ctx.arc(sx * d, sy * d, sr * stars, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+}
+const t0 = performance.now(); let p = 0, holding = false, committing = false, locked = false, bloom = 0, bloomT0 = 0;
+let holdMark = 0, pAtMark = 0, retractFrom = 0, holdT = 0, rafO = 0, scale = 1;
+const easeOut = x => 1 - (1 - x) ** 3;
+function holdMs() { return BANDS[bandOf(STEPS[idx])][3]; }
+function paintOrb(now) {
+  const W = cv.width, s = W / 360; if (!W) return;
+  const ph = .5 - .5 * Math.cos(Math.PI * ((now - t0) / 4000)), br = REDUCE ? 1 : .96 + ph * .06;
+  const ot = clamp((now - orbT0) / 450, 0, 1); orbD = orbFrom + (orbTo - orbFrom) * easeOut(ot);
+  // nightfall progress, driven by the clock: linear while held, a 260 ms linear retract on release
+  if (holding) p = clamp(pAtMark + (now - holdMark) / holdMs(), 0, 1);
+  else if (!committing && p > 0) p = clamp(retractFrom * (1 - (now - holdMark) / 260), 0, 1);
+  if (committing) bloom = clamp((now - bloomT0) / 1300, 0, 1);
+  cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, W, W); cx.setTransform(s, 0, 0, s, 0, 0);
+  // warm drop halo, receding as night falls
+  cx.save(); cx.translate(C0, C0); cx.scale(br, br); cx.translate(-C0, -C0);
+  const hy = C0 + orbD * .10, hr = orbD * .72, ha = .38 * clamp(1 - .7 * p, 0, 1), hg = cx.createRadialGradient(C0, hy, 0, C0, hy, hr);
+  hg.addColorStop(0, `rgba(130,185,215,${ha})`); hg.addColorStop(1, 'rgba(130,185,215,0)'); cx.fillStyle = hg; cx.beginPath(); cx.arc(C0, hy, hr, 0, 7); cx.fill();
+  // day sphere fades almost out, night sphere + stars fade in
+  const d = Math.max(2, Math.round(orbD * s * br));
+  if (offA.width !== d) { offA.width = offA.height = offB.width = offB.height = d; }
+  sphere(offA.getContext('2d'), SPHERE.day, d, 0); sphere(offB.getContext('2d'), SPHERE.night, d, s * br);
+  cx.restore(); cx.setTransform(1, 0, 0, 1, 0, 0);
+  const o = W / 2 - d / 2;
+  cx.globalAlpha = clamp(1 - .92 * p, 0, 1); cx.drawImage(offA, o, o);
+  if (p > 0) { cx.globalAlpha = p; cx.drawImage(offB, o, o); }
+  cx.globalAlpha = 1; cx.setTransform(s, 0, 0, s, 0, 0);
+  const orbR = orbD / 2 * br;
+  if (bloom > .001 && bloom < 1) {
+    const R = orbR * (.86 + bloom * .69), a = .85 * (1 - bloom), g = cx.createRadialGradient(C0, C0, 0, C0, C0, R);
+    g.addColorStop(0, rgba(ACC, a)); g.addColorStop(.5, rgba(ACC, a * .4)); g.addColorStop(1, rgba(ACC, 0)); cx.fillStyle = g; cx.beginPath(); cx.arc(C0, C0, R, 0, 7); cx.fill();
+  }
+  if (p > 0) {
+    cx.strokeStyle = rgba(ACC, .22 * p); cx.lineWidth = 4; cx.beginPath(); cx.arc(C0, C0, orbR + 1, 0, 7); cx.stroke();
+    cx.strokeStyle = rgba(ACC, .9 * p); cx.lineWidth = 1.5; cx.beginPath(); cx.arc(C0, C0, orbR, 0, 7); cx.stroke();
+    const arcR = BASE * 1.45 * 1.5 / 2 - 20; cx.strokeStyle = rgba(ACC, .42); cx.lineWidth = 2; cx.lineCap = 'round';
+    cx.beginPath(); cx.arc(C0, C0, arcR, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * p); cx.stroke();
+  }
+  const nm = $('#oNm'); nm.style.setProperty('--b', br); nm.style.opacity = clamp(1 - p, 0, 1);
+}
+let orbVisible = true;
+function loopOrb(now) { paintOrb(now); rafO = 0; if (orbVisible && !REDUCE || holding || committing || p > 0 || now - orbT0 < 500) wake(); }
+function wake() { if (!rafO) rafO = requestAnimationFrame(loopOrb); }
+new IntersectionObserver(([e]) => { orbVisible = e.isIntersecting; if (orbVisible) wake(); }).observe(cv);
+
+// scale the 400 × 889 dp screen to the frame
+const scr = $('#scr');
+new ResizeObserver(() => { scale = scr.clientWidth / 400; scr.style.setProperty('--k', scale); cv.width = cv.height = Math.round(360 * scale * DPR); paintOrb(performance.now()); }).observe(scr);
+
+const orb = $('#orb');
 function startHold(e) {
-  if (locked) return; e?.preventDefault(); if (holding) return; holding = true; orb.classList.add('holding'); hintOff();
-  pAtMark = p; mark = performance.now(); cancelAnimationFrame(rafH); rafH = requestAnimationFrame(step);
-  clearTimeout(holdT); holdT = setTimeout(() => { if (holding) lock(); }, HOLD * (1 - p));
+  if (locked || committing || holding) return; e?.preventDefault(); holding = true; hintOff();
+  pAtMark = p; holdMark = performance.now(); wake();
+  clearTimeout(holdT); holdT = setTimeout(commit, holdMs() * (1 - p));
   if (navigator.vibrate) try { navigator.vibrate(8); } catch (_) {}
 }
-function stopHold() { if (!holding) return; holding = false; orb.classList.remove('holding'); clearTimeout(holdT); pAtMark = p; mark = performance.now(); cancelAnimationFrame(rafH); rafH = requestAnimationFrame(step); }
+function stopHold() { if (!holding) return; holding = false; clearTimeout(holdT); retractFrom = p; holdMark = performance.now(); wake(); }
+function commit() {
+  if (!holding) return; holding = false; committing = true; p = 1; bloomT0 = performance.now(); wake();
+  if (navigator.vibrate) try { navigator.vibrate([18, 40, 28]); } catch (_) {}
+  setTimeout(lock, 1100);
+}
 orb.addEventListener('pointerdown', e => { try { orb.setPointerCapture(e.pointerId); } catch (_) {} startHold(e); });
 ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => orb.addEventListener(ev, stopHold));
 orb.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) startHold(e); });
 orb.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') stopHold(); });
 orb.addEventListener('contextmenu', e => e.preventDefault());
+
+// the lock screen
 const hhmm = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+let endAt = 0, lockM = 0, tickT = 0;
 function lock() {
-  locked = true; holding = false; clearTimeout(holdT); cancelAnimationFrame(rafH); orb.classList.remove('holding'); p = 0; pAtMark = 0; prog.style.strokeDashoffset = PC;
-  if (navigator.vibrate) try { navigator.vibrate([18, 40, 28]); } catch (_) {}
-  const m = STOPS[idx].m; endAt = Date.now() + m * 60000;
-  $('#lTop').textContent = (mode === 'full' ? 'Full Lock' : 'Selective · 47 apps') + ' · until ' + hhmm(new Date(endAt));
+  locked = true; committing = false; lockM = STEPS[idx]; endAt = Date.now() + lockM * 60000;
   updateCount(); tickT = setInterval(updateCount, 1000);
   document.body.classList.add('is-night'); nightTarget = 1; lockSky.repaint(); if (REDUCE) heroSky.repaint();
   $('#demoCap').innerHTML = "<b>Locked.</b> In the real app there's no way out until the time is up. Here, there's a button.";
 }
-function updateCount() { const left = Math.max(0, endAt - Date.now()), mins = Math.ceil(left / 60000); const h = Math.floor(mins / 60); $('#lH').textContent = h; $('#lHl').textContent = h === 1 ? 'HOUR' : 'HOURS'; $('#lM').textContent = String(mins % 60).padStart(2, '0'); if (left <= 0) unlock(); }
+function updateCount() {
+  const left = Math.max(0, endAt - Date.now()), mins = Math.ceil(left / 60000), h = Math.floor(mins / 60), m = mins % 60;
+  $('#lTop').textContent = `${mode === 'full' ? 'Full Lock' : 'Selective Lock'} · ${total(lockM)} · ${hhmm(new Date())}`;
+  const col = (n, cap) => `<div class="col"><div class="n">${n}</div><div class="l">${cap}</div></div>`;
+  const hc = col(h, h === 1 ? 'HOUR' : 'HOURS'), mc = col(m, m === 1 ? 'MINUTE' : 'MINUTES');
+  $('#lRow').innerHTML = h && m ? hc + '<div class="dotsep">·</div>' + mc : h ? hc : mc;
+  if (left <= 0) unlock();
+}
 function unlock() {
-  locked = false; clearInterval(tickT); document.body.classList.remove('is-night'); nightTarget = 0; if (REDUCE) heroSky.repaint();
-  $('#demoCap').innerHTML = '<b>This is the app.</b> Turn the dial, pick a mode, then press and hold the orb.'; $('#holdHint').style.opacity = 1;
+  locked = false; committing = false; clearInterval(tickT); p = 0; bloom = 0; wake();
+  document.body.classList.remove('is-night'); nightTarget = 0; if (REDUCE) heroSky.repaint();
+  $('#demoCap').innerHTML = '<b>This is the app.</b> Turn the dial, pick a mode, then press and hold the orb.';
 }
 $('#endDemo').onclick = unlock;
 
-// live status-bar clock + week strip
+// live status-bar clock + week strip (the last seven days, today on the right)
 function clock() { $('#clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(/\s?[AP]M/i, ''); }
 clock(); setInterval(clock, 30000);
-const today = new Date().getDay(); $('#week').innerHTML = 'SMTWTFS'.split('').map((d, i) => `<span class="${i === today ? 'today' : ''}">${d}</span>`).join('');
+$('#week').innerHTML = [6, 5, 4, 3, 2, 1, 0].map(k => { const d = new Date(Date.now() - k * 864e5); return `<span class="${k ? 'held' : 'today'}">${'SMTWTFS'[d.getDay()]}</span>`; }).join('');
+setMode('sel'); render();
 
 /* ── manifesto ──────────────────────────────────────────────── */
 const mp = $('#manifestoText');

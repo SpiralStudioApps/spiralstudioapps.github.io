@@ -238,8 +238,14 @@ body.is-night .lockscr{opacity:1;pointer-events:auto}
 .tab i{width:16px;height:16px;border-radius:50%}
 .tab[aria-selected="true"]{color:var(--text);border-color:var(--accent)}
 .themes .free{margin-top:16px;font-size:13px;color:var(--muted);max-width:34em}
-.themes .reset{margin-top:10px;background:none;border:0;padding:0;color:var(--accent-light);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.themes .reset{align-self:flex-start;margin-top:10px;background:none;border:0;padding:0;color:var(--accent-light);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .themes .reset[hidden]{display:none}
+/* the selected sky as the real lock screen, in a phone */
+.tphone{--dh:min(72vh,620px);position:absolute;z-index:2;top:50%;right:28px;height:var(--dh);width:calc(var(--dh) * .4611);aspect-ratio:auto;padding:calc(var(--dh) * .01014);transform:translateY(-50%)}
+.themes .tphone canvas{position:absolute;inset:0;width:100%;height:100%;transition:opacity .45s}
+.tphone .lk{pointer-events:none}
+.tabs2.hint .tab:not([aria-selected="true"]) i{animation:dotPulse 2.6s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{box-shadow:0 0 0 0 rgba(233,240,242,0)}50%{box-shadow:0 0 0 4px rgba(233,240,242,.14),0 0 14px rgba(233,240,242,.35)}}
 
 /* ── sections ── */
 section.block{padding:150px 0}
@@ -346,6 +352,15 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .plan .tag{position:static;display:inline-block;margin-bottom:14px;align-self:flex-start}
   .prices b{font-size:21px}
   section.block{padding:100px 0}
+}
+@media (max-width:900px){
+  .themes{height:auto;min-height:0}
+  .themes .content{height:auto;justify-content:flex-start;padding:96px 20px 64px}
+  .themes .shade{background:linear-gradient(0deg,rgba(5,7,12,.7),rgba(5,7,12,.25) 60%,rgba(5,7,12,.5))}
+  .tphone{--dh:min(56svh,470px);position:relative;top:auto;right:auto;transform:none;margin:0 auto 30px}
+  .tabs2{gap:8px}
+  .tab{padding:11px 17px 11px 11px;font-size:15px}
+  .tab i{width:19px;height:19px}
 }
 @media (max-width:560px){
   .grid4{grid-template-columns:1fr} .wrap{padding:0 20px} nav{padding:16px 20px}
@@ -496,15 +511,32 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   </div>
 </section>
 
+<section class="block" aria-label="Built to hold" style="padding-top:110px">
+  <div class="wrap">
+    <div class="eyebrow rv">Built to hold</div>
+    <h2 class="big rv d1" style="margin-top:20px;max-width:13em">A lock is only worth something if it <em>keeps its word.</em></h2>
+    <div class="grid4">
+      <div class="rv"><div class="n">01</div><h3>Survives restarts.</h3><p>A running session comes back after a reboot and carries on to its end time.</p></div>
+      <div class="rv d1"><div class="n">02</div><h3>Calls get through.</h3><p>Incoming and emergency calls work in every mode, and alarms still ring.</p></div>
+      <div class="rv d2"><div class="n">03</div><h3>Android keeps count.</h3><p>Daily Limits read usage from Android itself, so nothing resets when you restart.</p></div>
+      <div class="rv d3"><div class="n">04</div><h3>Nothing leaves.</h3><p>No account, no analytics, no ads. Your history lives on your phone only.</p></div>
+    </div>
+  </div>
+</section>
+
 <section class="themes" id="themes" aria-label="Lock screen themes">
   <canvas id="themeSky" aria-hidden="true"></canvas>
   <div class="shade"></div>
   <div class="content">
+    <div class="device tphone" aria-hidden="true"><div class="scr" id="tScr"><canvas id="tLock"></canvas>
+      <div class="lk" id="tLk"><div class="top" id="tTop">Full Lock · 45 minutes</div><div class="sp"></div>
+        <div class="count"><div class="row"><div class="col"><div class="n">45</div><div class="l">MINUTES</div></div></div><div class="rem">remaining</div></div>
+        <div class="sp"></div><div class="em">Emergency</div><div class="tail"></div></div></div></div>
     <div class="eyebrow">The lock screen · five living skies</div>
     <div class="theme-name" id="themeName">Ocean</div>
     <p class="theme-line" id="themeLine">Moonlight falling through deep water. Slow swells, breathing.</p>
-    <div class="tabs2" role="tablist" aria-label="Themes" id="tabs"></div>
-    <div class="free">Ocean is free; the other four come with Premium. Tap one to see it across this page and in the phone up top.</div>
+    <div class="tabs2 hint" role="tablist" aria-label="Themes" id="tabs"></div>
+    <div class="free">Ocean is free; the other four come with Premium. Tap one to dress this page and the demo phone in it.</div>
     <button class="reset" id="themeReset" hidden>Back to the original colours</button>
   </div>
 </section>
@@ -526,19 +558,6 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
         <tr><td>No streaks to break<small>every finished lock adds a star to your own galaxy</small></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
       </tbody>
     </table>
-  </div>
-</section>
-
-<section class="block" aria-label="Built to hold" style="padding-top:40px">
-  <div class="wrap">
-    <div class="eyebrow rv">Built to hold</div>
-    <h2 class="big rv d1" style="margin-top:20px;max-width:13em">A lock is only worth something if it <em>keeps its word.</em></h2>
-    <div class="grid4">
-      <div class="rv"><div class="n">01</div><h3>Survives restarts.</h3><p>A running session comes back after a reboot and carries on to its end time.</p></div>
-      <div class="rv d1"><div class="n">02</div><h3>Calls get through.</h3><p>Incoming and emergency calls work in every mode, and alarms still ring.</p></div>
-      <div class="rv d2"><div class="n">03</div><h3>Android keeps count.</h3><p>Daily Limits read usage from Android itself, so nothing resets when you restart.</p></div>
-      <div class="rv d3"><div class="n">04</div><h3>Nothing leaves.</h3><p>No account, no analytics, no ads. Your history lives on your phone only.</p></div>
-    </div>
   </div>
 </section>
 
@@ -687,7 +706,7 @@ const SKY = {
   eclipse(ctx, w, h, t) {
     vgrad(ctx, w, h, [[0, '#141628'], [.55, '#0E101E'], [1, '#090A14']]);
     stars(ctx, w, h, t, { alpha: .5 });
-    const cx = w * (w > h ? .66 : .5), cy = h * (w > h ? .4 : .24), r = Math.min(w, h) * .11;
+    const cx = w * .5, cy = h * (w > h ? .2 : .24), r = Math.min(w, h) * .11; // high and central, clear of the phones
     blob(ctx, cx, cy, r * 7, 1, 1, [[0, rgba([255, 233, 190], .1)], [.4, rgba([246, 221, 180], .04)], [1, rgba([216, 200, 168], 0)]]);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(cx, cy); ctx.rotate(t * .012);
     for (const s of STREAMERS) {
@@ -1194,12 +1213,13 @@ function setStep(i) { if (i === curStep) return; curStep = i; stageImgs.forEach(
 stepEls.forEach((st, k) => { const d = document.createElement('button'); d.innerHTML = '<i></i>'; d.setAttribute('aria-label', st.querySelector('.num').textContent); d.setAttribute('aria-current', k === 0); d.onclick = () => SLIDE ? scrollTo({ top: modes.offsetTop + HOLD[k] * (modes.offsetHeight - innerHeight), behavior: REDUCE ? 'auto' : 'smooth' }) : stepsRow.scrollTo({ left: st.offsetLeft - (stepsRow.clientWidth - st.offsetWidth) / 2, behavior: REDUCE ? 'auto' : 'smooth' }); dots.appendChild(d); });
 
 /* ── scroll ─────────────────────────────────────────────────── */
-const nav = $('#nav'), manifesto = $('#manifesto'), mcta = $('#mcta'), heroSec = $('#hero'), finalSec = $('#final'); let lastY = scrollY, ticking = false;
+const priceCta = $('.price-cta'), themeTabs = $('#tabs'), nav = $('#nav'), manifesto = $('#manifesto'), mcta = $('#mcta'), heroSec = $('#hero'), finalSec = $('#final'); let lastY = scrollY, ticking = false;
 function onScroll() {
   ticking = false; const y = scrollY, vh = innerHeight;
   nav.classList.toggle('solid', y > vh * .5);
   snapGate(y, vh);
-  const fr = finalSec.getBoundingClientRect(); const mdr = modes.getBoundingClientRect(); mcta.classList.toggle('show', y > heroSec.offsetHeight - vh * .2 && fr.top > vh * .8 && !(mdr.top < vh * .5 && mdr.bottom > vh * .5)); // out of the way of the pinned cards
+  const fr = finalSec.getBoundingClientRect(); const mdr = modes.getBoundingClientRect(), under = el => { const r = el.getBoundingClientRect(); return r.bottom > vh - 120 && r.top < vh; };
+  mcta.classList.toggle('show', mdr.bottom < vh * .5 && fr.top > vh * .8 && !under(themeTabs) && !under(priceCta)); // never over the theme buttons or the pricing button // only once the four cards are behind you, and not over the final call to action
   // phones: while the four cards are pinned the top bar stays away, so it can't drop in over a card
   // (snapping nudges the page up and down) and then slide off again
   const mr0 = modes.getBoundingClientRect(), overCards = innerWidth <= 900 && mr0.top < vh * .35 && mr0.bottom > vh * .65;
@@ -1252,12 +1272,16 @@ const THEMES = [
 let themeIdx = 1, userPicked = false, themesVisible = false;
 const themeCanvas = $('#themeSky'), themeSky = runner(themeCanvas, (ctx, w, h, t) => SKY[THEMES[themeIdx].id](ctx, w, h, t));
 const tabs = $('#tabs'), tName = $('#themeName'), tLine = $('#themeLine'), root = document.documentElement;
+const tScr = $('#tScr'), tLock = $('#tLock'); let tShown = performance.now();
+const tPhone = runner(tLock, (ctx, w, h, t) => { const id = THEMES[themeIdx].id; LOCKS[id](ctx, w, h, t, .15, .62 + (performance.now() - tShown) / 30000); ctx.setTransform(1, 0, 0, 1, 0, 0); });
+new ResizeObserver(() => tScr.style.setProperty('--k', tScr.clientWidth / 400)).observe(tScr);
+const tClock = () => { $('#tTop').textContent = `Full Lock · 45 minutes · ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`; }; tClock(); setInterval(tClock, 30000);
 THEMES.forEach((th, i) => { const b = document.createElement('button'); b.className = 'tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === themeIdx); b.innerHTML = `<i style="background:${th.dot}"></i>${th.name}`; b.onclick = () => pickTheme(i); tabs.appendChild(b); });
 function setTheme(i) {
   if (i === themeIdx) return; themeIdx = i; const th = THEMES[i];
   [...tabs.children].forEach((b, k) => b.setAttribute('aria-selected', k === i));
-  themeCanvas.style.opacity = 0; tName.classList.add('out'); tLine.classList.add('out');
-  setTimeout(() => { themeSky.repaint(); themeCanvas.style.opacity = 1; tName.textContent = th.name; tLine.textContent = th.line; tName.classList.remove('out'); tLine.classList.remove('out'); }, 450);
+  themeCanvas.style.opacity = 0; tLock.style.opacity = 0; tName.classList.add('out'); tLine.classList.add('out');
+  setTimeout(() => { themeSky.repaint(); tShown = performance.now(); tPhone.repaint(); tLock.style.opacity = 1; themeCanvas.style.opacity = 1; tName.textContent = th.name; tLine.textContent = th.line; tName.classList.remove('out'); tLine.classList.remove('out'); }, 450);
   // while it cycles on its own, only this section takes the colour; tapping a sky dresses the whole page
   themesSec.style.setProperty('--accent', th.accent); themesSec.style.setProperty('--accent-light', th.light);
 }
@@ -1265,7 +1289,7 @@ const themesSec = $('#themes'), planOrbs = $('#planOrbs'), resetBtn = $('#themeR
 THEMES.forEach((th, i) => { const b = document.createElement('button'); b.style.background = th.dot; b.setAttribute('aria-label', `Try the ${th.name} sky on this page`); b.setAttribute('aria-pressed', 'false'); b.onclick = () => pickTheme(i); planOrbs.appendChild(b); });
 function markPicked(i) { [...planOrbs.children].forEach((b, k) => b.setAttribute('aria-pressed', k === i)); resetBtn.hidden = i < 0; }
 function pickTheme(i, save = true) {
-  const th = THEMES[i]; userPicked = true; setTheme(i);
+  const th = THEMES[i]; userPicked = true; setTheme(i); tabs.classList.remove('hint');
   for (const [k, v] of [['--accent', th.accent], ['--accent-light', th.light], ['--cta', th.accent], ['--cta-light', th.light]]) root.style.setProperty(k, v);
   applyAppTheme(th.id); heroSky.repaint(); markPicked(i);
   if (save) try { localStorage.setItem(THEME_KEY, th.id); } catch (_) {}

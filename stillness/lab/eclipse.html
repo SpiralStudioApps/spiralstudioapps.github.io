@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Eclipse lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b11;--text:#e9f0f2;--muted:rgba(233,240,242,.55);--line:rgba(233,240,242,.12);--gold:#e2d0a0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Roboto,system-ui,sans-serif;padding:28px 16px 60px}
+h1{font-family:"Playfair Display",serif;font-weight:400;font-size:clamp(28px,5vw,44px);text-align:center}
+p.lead{color:var(--muted);text-align:center;max-width:36em;margin:10px auto 0;font-size:15px;line-height:1.55}
+.ctrl{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 26px}
+.ctrl button{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:999px;padding:10px 18px;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ctrl button.main{background:var(--gold);color:#14110a;border-color:var(--gold);font-weight:500}
+.clock{text-align:center;color:var(--muted);font-size:13px;margin-top:-12px;margin-bottom:18px;font-variant-numeric:tabular-nums}
+.pair{display:flex;gap:28px;justify-content:center;flex-wrap:wrap}
+figure{display:flex;flex-direction:column;align-items:center;gap:12px}
+figcaption{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+figcaption b{color:var(--gold);font-weight:500}
+.phone{--dh:min(78vh,640px);height:var(--dh);width:calc(var(--dh) * .4611);padding:calc(var(--dh) * .01014);border-radius:12.5%/5.6%;background:linear-gradient(150deg,#28323f,#0d1219 40%,#0a0e14);box-shadow:0 0 0 1px rgba(233,240,242,.1),0 40px 90px -30px rgba(0,0,0,.95)}
+.scr{position:relative;width:100%;height:100%;border-radius:10.8%/4.9%;overflow:hidden;background:#090a14}
+.scr canvas{position:absolute;inset:0;width:100%;height:100%}
+.lk{position:absolute;left:0;top:0;width:400px;height:889px;transform-origin:0 0;transform:scale(var(--k,1));display:flex;flex-direction:column;align-items:center;color:#EEF3F5;pointer-events:none}
+.lk .top{padding-top:48px;font-size:12.5px;letter-spacing:.016em;color:rgba(238,243,245,.55)}
+.lk .sp{flex:1}.lk .n{font-family:"Playfair Display",serif;font-size:78px;line-height:104px}
+.lk .l{margin-top:6px;font-size:10px;font-weight:500;letter-spacing:.3em;padding-left:.3em;color:rgba(238,243,245,.55)}
+.lk .rem{padding-top:14px;font-size:13px;color:rgba(238,243,245,.45)}
+.lk .em{padding:10px 24px;margin-bottom:40px;font-size:13px;color:rgba(236,242,238,.5)}
+.credit{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.6}
+.credit a{color:var(--muted)}
+@media (max-width:700px){.phone{--dh:min(82svh,560px)}}
+</style></head><body>
+<h1>Eclipse, now and with a real corona</h1>
+<p class="lead">Both phones play the app's 30-second arrival: the sun, the thinning crescent, Baily's beads, the diamond ring, then totality. On the right, the corona is a real photograph of totality, plus earthshine on the moon and Venus beside the sun.</p>
+<div class="ctrl"><button class="main" id="replay">Replay the arrival</button><button id="total">Jump to totality</button><button id="pause">Pause</button></div>
+<div class="clock" id="clock">0.0 s</div>
+<div class="pair">
+  <figure><div class="phone"><div class="scr"><canvas id="a"></canvas><div class="lk"><div class="top">Full Lock · 45 minutes</div><div class="sp"></div><div class="n">45</div><div class="l">MINUTES</div><div class="rem">remaining</div><div class="sp"></div><div class="em">Emergency</div></div></div></div><figcaption>Now: drawn</figcaption></figure>
+  <figure><div class="phone"><div class="scr"><canvas id="b"></canvas><div class="lk"><div class="top">Full Lock · 45 minutes</div><div class="sp"></div><div class="n">45</div><div class="l">MINUTES</div><div class="rem">remaining</div><div class="sp"></div><div class="em">Emergency</div></div></div></div><figcaption><b>Proposed:</b> photo corona</figcaption></figure>
+</div>
+<p class="credit">Corona photograph: <a href="https://commons.wikimedia.org/wiki/File:Total_Solar_Eclipse_-_July_2,_2019_(48266572047).jpg">NASA Goddard Space Flight Center</a>, total solar eclipse of 2 July 2019, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>. Cropped, levelled and toned.</p>
+<script>
+(() => {
+const TAU = Math.PI * 2, DPR = Math.min(devicePixelRatio || 1, 2), clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const CORONA = new Image(); CORONA.src = 'corona-2019.webp'; const CORONA_LIMB = 0.4535;
+// The app's lock atmospheres (ui/lock/*Background.kt), drawn in dp on a 400-dp-wide screen.
+// Colours are the app's ARGB hex strings, 'AARRGGBB'.
+const bez = (x, x1 = .42, x2 = .58) => { let a = 0, b = 1; for (let k = 0; k < 24; k++) { const m = (a + b) / 2, bx = 3 * (1 - m) ** 2 * m * x1 + 3 * (1 - m) * m * m * x2 + m ** 3; if (bx < x) a = m; else b = m; } const u = (a + b) / 2; return 3 * (1 - u) * u * u + u ** 3; };
+const breathe = (t, ms) => { const u = (t * 1000 / ms) % 2; return bez(u < 1 ? u : 2 - u); }; // Compose EaseInOut, reversing
+const sweepLin = (t, ms) => { const u = (t * 1000 / ms) % 2; return u < 1 ? u : 2 - u; };     // LinearEasing, reversing
+const argb = h => [parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), parseInt(h.slice(6, 8), 16), parseInt(h.slice(0, 2), 16) / 255];
+const col = (h, a) => { const c = argb(h); return `rgba(${c[0]},${c[1]},${c[2]},${clamp(a === undefined ? c[3] : a, 0, 1)})`; };
+// a radial gradient from [pos, 'AARRGGBB'] stops, interpolated unpremultiplied like Android's shaders
+function appGrad(ctx, x, y, r, stops) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, Math.max(r, .01));
+  for (let i = 0; i < stops.length; i++) {
+    const [p0, h0] = stops[i], c0 = argb(h0); g.addColorStop(clamp(p0, 0, 1), `rgba(${c0[0]},${c0[1]},${c0[2]},${c0[3]})`);
+    if (i + 1 < stops.length) { const [p1, h1] = stops[i + 1], c1 = argb(h1); for (let k = 1; k < 6; k++) { const f = k / 6, m = j => Math.round(c0[j] + (c1[j] - c0[j]) * f); g.addColorStop(clamp(p0 + (p1 - p0) * f, 0, 1), `rgba(${m(0)},${m(1)},${m(2)},${c0[3] + (c1[3] - c0[3]) * f})`); } }
+  }
+  return g;
+}
+// Compose's drawCircle(radialGradient) under an optional scale about the centre
+function appBlob(ctx, x, y, r, sx, sy, stops, rotDeg = 0, px = x, py = y) {
+  if (r <= 0) return; ctx.save();
+  if (rotDeg) { ctx.translate(px, py); ctx.rotate(rotDeg * Math.PI / 180); ctx.translate(-px, -py); }
+  ctx.translate(x, y); ctx.scale(sx, sy); ctx.fillStyle = appGrad(ctx, 0, 0, r, stops); ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill(); ctx.restore();
+}
+const withA = (h, a) => (Math.round(clamp(a, 0, 1) * 255).toString(16).padStart(2, '0') + h.slice(-6)).toUpperCase();
+const vstops = (ctx, y0, y1, stops) => { const g = ctx.createLinearGradient(0, y0, 0, y1); stops.forEach(([o, h, a]) => g.addColorStop(o, col(h, a))); return g; };
+function starGlow(ctx, x, y, r, h, a) { a = clamp(a, 0, 1); appBlob(ctx, x, y, r * 5, 1, 1, [[0, withA(h, .6 * a)], [1, withA(h, 0)]]); ctx.fillStyle = col(h, a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+function dpFrame(ctx, W, H, bg) { const s = W / 400, w = 400, h = H / s; ctx.setTransform(s, 0, 0, s, 0, 0); ctx.fillStyle = vstops(ctx, 0, h, bg); ctx.fillRect(0, 0, w, h); return [w, h]; }
+
+// Eclipse's corona streamers (Ritual.kt coronaField), in limb units: the disc's limb is radius 1
+function coronaField(color, baseAlpha, count, seed, minL, maxL, axis = 12) {
+  const hash = x => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); }, span = Math.max(maxL - minL, .01), step = 360 / count, B = 8;
+  const rays = Array.from({ length: count }, (_, i) => {
+    const h1 = hash(i * 1.13 + seed * 7.7), h2 = hash(i * 3.71 + seed * 2.3 + 11), h3 = hash(i * .77 + seed * 5.1 + 23), h4 = hash(i * 2.31 + seed * 3.9 + 41);
+    const angle = i * step + (h1 - .5) * step * 1.4, env = .3 + .7 * Math.abs(Math.cos((angle - axis) * Math.PI / 180)) ** .55;
+    const raw = clamp(minL + span * env * (.28 + .85 * h2 * h2), minL, maxL), bucket = clamp(Math.round((raw - minL) / span * (B - 1)), 0, B - 1);
+    const len = minL + span * bucket / (B - 1), broad = h3 < .26, bend = (h4 - .5) * len * .34;
+    return { angle, len, bend, bucket, width: broad ? .07 + .075 * h4 : .006 + .017 * h3, alpha: (.45 + .55 * h3) * (.4 + .6 * env) * (1.05 - .4 * bucket / (B - 1)) * (broad ? .34 : 1) };
+  });
+  return { rays, color, baseAlpha, minL, span };
+}
+function drawCoronaField(ctx, f, x, y, limbR, turnDeg, alpha) {
+  if (alpha <= .004 || limbR <= 0) return;
+  const brushes = Array.from({ length: 8 }, (_, b) => { const len = f.minL + f.span * b / 7, g = ctx.createLinearGradient(1, 0, 1 + len, 0);
+    [[0, 0], [.14, 1], [.34, .56], [.55, .27], [.75, .11], [.9, .03], [1, 0]].forEach(([o, k]) => g.addColorStop(o, col(f.color, f.baseAlpha * k))); return g; });
+  ctx.save(); ctx.translate(x, y); ctx.scale(limbR, limbR); ctx.rotate(turnDeg * Math.PI / 180); ctx.lineCap = 'round';
+  for (const r of f.rays) {
+    ctx.save(); ctx.rotate(r.angle * Math.PI / 180); ctx.globalAlpha = clamp(alpha * r.alpha, 0, 1); ctx.strokeStyle = brushes[r.bucket]; ctx.lineWidth = r.width;
+    ctx.beginPath(); ctx.moveTo(1, 0); ctx.bezierCurveTo(1 + r.len * .35, r.bend * .12, 1 + r.len * .75, r.bend * .62, 1 + r.len, r.bend); ctx.stroke(); ctx.restore();
+  }
+  ctx.restore();
+}
+const ORB_CORONA = coronaField('FFF2ECDC', .62, 58, 3, .18, .40);
+const SKY_CORONA = coronaField('FFE9F0FC', .34, 112, 2, .14, 1.55);
+// the orb's corona (drawSphereCorona): warm bloom, turning streamers, pearl rim, all outside the limb
+function orbCorona(ctx, x, y, d, t, alpha) {
+  if (alpha <= .004) return; const swell = breathe(t, 16000), turn = (t / 420 * 360) % 360;
+  ctx.save(); ctx.globalAlpha = alpha * (.88 + .12 * swell);
+  appBlob(ctx, x, y, d * 1.368 / 2 * (.97 + .06 * swell), 1, 1, [[0, '00FAF4E4'], [.35, '00FAF4E4'], [.39, '57FAF4E4'], [.49, '24EADCBE'], [.64, '0ADACAAA'], [.82, '00DACAAA'], [1, '00DACAAA']]);
+  ctx.restore(); drawCoronaField(ctx, ORB_CORONA, x, y, d / 2, turn, alpha);
+  ctx.save(); ctx.globalAlpha = alpha; appBlob(ctx, x, y, d * 1.189 / 2, 1, 1, [[0, '00F8FAFE'], [.81, '00F8FAFE'], [.85, '8CF8FAFE'], [.9, '42E8EEFA'], [.95, '14D8E2F4'], [1, '00D8E2F4']]); ctx.restore();
+}
+
+const LOCKS = {
+  // OceanBackground.kt: breathing skylight sheen and five swell crests
+  ocean(ctx, W, H, t) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF0B1624'], [.46, 'FF0A1A2C'], [1, 'FF071120']]);
+    const a = .13 * (.55 + .45 * breathe(t, 15000));
+    appBlob(ctx, .5 * w, -.02 * h, .62 * w, 1.35, .85, [[0, withA('BEDEEE', a)], [1, '00BEDEEE']]);
+    for (const [y, x, ht, al, ms, tr] of [[.24, .42, 60, .10, 19000, 24], [.38, .58, 64, .07, 24000, 26], [.66, .46, 72, .12, 17000, 24], [.78, .55, 80, .16, 27000, 30], [.89, .48, 88, .20, 21000, 26]]) {
+      const r = ht * 1.5, dy = (.5 - breathe(t, ms)) * 2 * tr;
+      appBlob(ctx, x * w, y * h + dy, r, w * .75 / r, 1, [[0, withA('BADAEC', al)], [.5, withA('BADAEC', al * .35)], [1, '00BADAEC']]);
+    }
+  },
+  // DuskBackground.kt: ember dome and cloud bands that sink as the session goes on, stars surfacing
+  dusk(ctx, W, H, t, p) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF0B0F24'], [.32, 'FF161531'], [.58, 'FF2E2342'], [.82, 'FF56374A'], [1, 'FF74463F']]);
+    const sv = .12 + .73 * p;
+    for (const [x, y, r, a] of [[.18, .24, 1.3, .7], [.70, .16, 1, .5], [.42, .12, 1, .42], [.86, .34, 1.1, .5], [.10, .44, 1, .36], [.58, .30, 1, .4]]) { ctx.fillStyle = col('FFE6E8F6', a * sv); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); }
+    starGlow(ctx, .31 * w, .25 * h, 1.3, 'FFEEF0F8', .55 + .45 * breathe(t, 7000));
+    starGlow(ctx, .22 * w, .12 * h, 1, 'FFE6E8F4', (.45 + .5 * breathe(t, 6000)) * (.4 + .6 * sv));
+    starGlow(ctx, .76 * w, .20 * h, .8, 'FFDFE2F0', (.4 + .5 * breathe(t, 8000)) * (.4 + .6 * sv));
+    const hd = breathe(t, 70000); appBlob(ctx, .5 * w + (hd - .5) * .028 * w, .40 * h + (hd - .5) * .02 * h, .62 * w, 1.5, .5, [[0, '1F7A5C8E'], [1, '007A5C8E']]);
+    const das = (.95 - .67 * p) * (.55 + .45 * breathe(t, 12000)), sink = .14 * h * p;
+    appBlob(ctx, .5 * w, h + .10 * h + sink, .72 * w, 1.45, 1.05, [[0, withA('EE9E5C', .34 * das)], [.48, withA('C47460', .14 * das)], [.75, '00C47460'], [1, '00C47460']]);
+    const bf = 1 - .6 * p;
+    for (const [y, ht, c, a, ms, range, s0, s1] of [[.62, 46, 'E29268', .22, 23000, 26, -.15, .70], [.71, 52, 'CE7C6E', .18, 29000, 22, .30, 1.20], [.80, 56, 'BA6E60', .16, 26000, 24, -.20, .75]]) {
+      const dr = breathe(t, ms), al = a * bf, dx = (dr - .5) * 2 * range, dyy = (.5 - dr) * .6 * range, half = (s1 - s0) / 2 * w;
+      appBlob(ctx, (s0 + s1) / 2 * w + dx, (y + sink / h) * h + dyy, ht * 1.6, half / ht, 1, [[0, withA(c, al)], [.5, withA(c, al * .45)], [1, withA(c, 0)]]);
+    }
+    const na = .55 * p; if (na > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF060710', .42 * na / .55], [.42, 'FF060710', .12 * na / .55], [1, 'FF060710', na]]); ctx.fillRect(0, 0, w, h); }
+  },
+  // ForestBackground.kt: canopy shadows, swaying light shafts, fireflies, dawn gathering below
+  forest(ctx, W, H, t, p) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF0B1710'], [.55, 'FF081209'], [1, 'FF050D07']]);
+    const canopy = (x, y, r, a) => appBlob(ctx, x, y, r, 1, 1, [[0, withA('020704', a)], [.5, withA('020704', a * .4)], [1, '00020704']]);
+    canopy(-.10 * w, -.12 * h, .62 * w, .9); canopy(1.12 * w, -.10 * h, .60 * w, .85);
+    const A = breathe(t, 28000), B = breathe(t, 34000), beam = 1.06 * h;
+    const shaft = (xf, wd, a, ang, sway) => { const ox = xf * w + sway, oy = -.06 * h; appBlob(ctx, ox, oy, beam, wd / beam, 1, [[0, withA('C8E8C8', a)], [.32, withA('AAD2AA', a * .42)], [.62, withA('AAD2AA', a * .12)], [.82, '00AAD2AA'], [1, '00AAD2AA']], ang, ox, 0); };
+    shaft(.22, 150, .26, 14 + (A - .5) * 1.5, (A - .5) * 30); shaft(.52, 92, .19, 20 - (B - .5) * 2, (.5 - B) * 24); shaft(.70, 60, .22, 14.5 + (A - .5) * 1.5, (A - .5) * 30);
+    appBlob(ctx, .08 * w, .48 * h, .55 * w, 1, 1, [[0, '38608A64'], [1, '00608A64']]);
+    const fly = (x, y, r, a) => { a = clamp(a, 0, 1); appBlob(ctx, x, y, r * 6, 1, 1, [[0, withA('E2D092', .55 * a)], [1, '00E2D092']]); ctx.fillStyle = col('FFE2D092', a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); };
+    fly(.28 * w, .48 * h, 1.75, .35 + .6 * breathe(t, 5000)); fly(.70 * w, .60 * h, 1.5, .30 + .6 * breathe(t, 7000)); fly(.46 * w, .72 * h, 1.5, .28 + .55 * breathe(t, 6000));
+    const dawn = .05 + .95 * p, rise = .12 * h * (1 - p);
+    appBlob(ctx, .5 * w, h + .06 * h + rise, .62 * h, 1.5, .85, [[0, withA('CAB476', .28 * dawn)], [.45, withA('8C7E4E', .09 * dawn)], [.72, '008C7E4E'], [1, '008C7E4E']]);
+  },
+  // AuroraBackground.kt: drifting stars and five swaying teal/violet curtains
+  aurora(ctx, W, H, t) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF05090F'], [.6, 'FF081019'], [1, 'FF0A141D']]);
+    const sd = sweepLin(t, 90000), dx = (sd - .5) * .028 * w, dy = (.5 - sd) * .022 * h;
+    for (const [x, y, r, a] of [[.15, .18, 1.4, .5], [.72, .12, 1, .38], [.88, .32, 1.2, .42], [.35, .09, 1, .3], [.55, .24, 1.1, .34], [.08, .44, 1, .26], [.92, .58, 1.3, .32], [.28, .40, 1, .26], [.64, .47, 1.1, .3], [.80, .74, 1, .24], [.18, .68, 1.2, .28], [.47, .62, 1, .22]]) { ctx.fillStyle = col('FFD7E8EE', a); ctx.beginPath(); ctx.arc(x * w + dx, y * h + dy, r, 0, TAU); ctx.fill(); }
+    const A = breathe(t, 16000), B = breathe(t, 19000), C = breathe(t, 14000);
+    for (const [xf, wd, hf, a, sw, spx, tilt] of [[.10, 70, .46, .20, A, 28, -3.5], [.24, 100, .52, .16, B, 26, 3], [.45, 60, .40, .22, C, 21, -2.5], [.58, 120, .56, .13, A, 28, -3.5], [.79, 80, .44, .18, B, 26, 3]]) {
+      const cx = xf * w + (sw - .5) * 2 * spx, ht = hf * h, rot = tilt + (sw - .5) * 1.2, r1 = ht * .62, r2 = ht * .30;
+      appBlob(ctx, cx, .30 * ht, r1, wd / (r1 * 1.1), 1, [[0, withA('76DEBA', a)], [.5, withA('76DEBA', a * .35)], [1, '0076DEBA']], rot, cx, 0);
+      appBlob(ctx, cx, .74 * ht, r2, wd / (r2 * 1.3), 1, [[0, withA('A08CE6', a * .45)], [1, '00A08CE6']], rot, cx, 0);
+    }
+    ctx.fillStyle = vstops(ctx, .8 * h, h, [[0, '0004070B'], [1, 'D904070B']]); ctx.fillRect(0, .8 * h, w, .2 * h);
+  },
+  // EclipseBackground.kt: the 30-second arrival (sun, crescent, Baily's beads, diamond ring) then totality
+  eclipse(ctx, W, H, t, p, arrival) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF141628'], [.55, 'FF0E101E'], [1, 'FF090A14']]);
+    const WT = [0, .53, .83, 1], WP = [0, .64, .74, 1], WM = [1.208, .522, .547, 1.529];
+    const phase = x => { x = clamp(x, 0, 1); let i = 0; while (i < 2 && x > WT[i + 1]) i++; const hh = WT[i + 1] - WT[i], u = clamp((x - WT[i]) / hh, 0, 1), u2 = u * u, u3 = u2 * u;
+      return (2 * u3 - 3 * u2 + 1) * WP[i] + (u3 - 2 * u2 + u) * hh * WM[i] + (-2 * u3 + 3 * u2) * WP[i + 1] + (u3 - u2) * hh * WM[i + 1]; };
+    const q = phase(arrival), ramp = (a, b) => clamp((q - a) / (b - a), 0, 1);
+    const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235;
+    const moonR = 67 * u, moonDx = 142 * u * (1 - Math.min(1, q / .72)), crescent = Math.max(0, (moonDx - 2 * u) / u);
+    const day = clamp(1 - .10 * ramp(0, .44) - .55 * ramp(.44, .65) - .35 * ramp(.65, .709), 0, 1), veil = .64 * ramp(.44, .70);
+    const hot = ramp(.48, .72), alive = clamp(crescent / 3.5, 0, 1), cor = ramp(.705, .726), sv = ramp(.68, .82), hor = ramp(.70, .84), rush = ramp(.65, .73);
+    const swell = breathe(t, 16000), tA = breathe(t, 6000), tB = breathe(t, 8500), turn = (t / 420 * 360) % 360;
+    if (day > .004) {
+      appBlob(ctx, sx, sy, sunR * (1.2 + 1.55 * day), 1, 1, [[0, withA('FFE9BE', .18 * day)], [.42, withA('F6DDB4', .085 * day)], [.74, withA('D8C8A8', .03 * day)], [1, '00D8C8A8']]);
+      appBlob(ctx, sx, sy, w * 1.5, 1, 1, [[0, withA('9AA8C8', .07 * day)], [1, '009AA8C8']]);
+    }
+    if (veil > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF04050C', veil], [.62, 'FF05060E', veil * .88], [1, 'FF07080F', veil * .7]]); ctx.fillRect(0, 0, w, h); }
+    if (rush > .001 && rush < .999) { const a = .5 * Math.sin(Math.PI * rush) ** .6, bc = w * (-1.3 + 2.15 * rush), hf = w * .8, g = ctx.createLinearGradient(bc - hf, 0, bc + hf, 0); g.addColorStop(0, col('00040510')); g.addColorStop(.5, col('FF040510', a)); g.addColorStop(1, col('00040510')); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); }
+    if (sv > .004) {
+      [[.14, .09, 1.1, .6], [.29, .06, .9, .42], [.44, .11, 1, .5], [.62, .07, .9, .4], [.76, .12, 1.1, .55], [.90, .08, .9, .38], [.08, .22, 1, .45], [.35, .19, .9, .36], [.68, .24, 1, .44], [.92, .31, .9, .38], [.06, .40, 1, .4], [.24, .45, .9, .34], [.78, .43, 1, .42], [.50, .50, .9, .3], [.16, .58, .9, .32], [.88, .56, 1, .36]]
+        .forEach(([x, y, r, a], i) => { ctx.fillStyle = col('FFE8ECF8', a * sv * (.68 + .32 * (i % 2 ? tB : tA))); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); });
+      starGlow(ctx, .19 * w, .13 * h, 1.2, 'FFEFF2FA', (.5 + .45 * tB) * sv); starGlow(ctx, .83 * w, .18 * h, 1, 'FFE6EAF6', (.45 + .45 * tA) * sv);
+    }
+    if (hor > .004) {
+      ctx.fillStyle = vstops(ctx, 0, h, [[0, '00FF9A6E'], [.7, '00FF9A6E'], [.88, 'FFE8875E', .07 * hor], [1, 'FFFFB07E', .17 * hor]]); ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FFB98A78', .05 * hor], [.16, '00B98A78'], [1, '00B98A78']]); ctx.fillRect(0, 0, w, h);
+    }
+    if (cor > .004) {
+      const b = cor * (.94 + .12 * swell), L = 1 / 2.7;
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.arc(sx, sy, sunR, 0, TAU, true); ctx.clip('evenodd');
+      appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.08, withA('E7EFFB', .42 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.32, withA('E2EAF8', .16 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.72, withA('DAE3F4', .048 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [L * 2.25, withA('D6E0F2', .008 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
+      drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, b);
+      appBlob(ctx, sx, sy, sunR * 1.16, 1, 1, [[0, '00F8FAFE'], [.845, '00F8FAFE'], [.875, withA('F8FAFE', .55 * b)], [.915, withA('EAF0FC', .24 * b)], [.96, withA('DCE6F8', .07 * b)], [1, '00DCE6F8']]);
+      ctx.restore();
+    }
+    if (alive > .004 && day > .004) { const a = (.30 + .42 * hot) * alive; appBlob(ctx, sx - .92 * hot * sunR, sy, sunR * (1.75 - .85 * hot), 1, 1, [[0, withA('FFFBF0', a)], [.5, withA('FFEFCE', a * .35)], [1, '00FFEFCE']]); }
+    const sunUp = crescent > 0;
+    if (sunUp && day > .004) { const gr = sunR + 34 * u * (.9 + .1 * breathe(t, 11000)); appBlob(ctx, sx, sy, gr, 1, 1, [[0, withA('FFF0CE', .5 * day)], [sunR / gr, withA('FFF0CE', .5 * day)], [1, '00FFF0CE']]); }
+    if (sunUp) {
+      ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = appGrad(ctx, sx - 5.2 * u, sy - 10.4 * u, sunR, [[0, 'FFFFFFFF'], [.34, 'FFFFFFFA'], [.62, 'FFFFF6DC'], [.84, 'FFFFE6B2'], [1, 'FFFCD190']]); ctx.fillRect(sx - sunR, sy - sunR, sunR * 2, sunR * 2); ctx.restore();
+      if (hot > .004) { ctx.fillStyle = col('FFFFFFFF', .85 * hot); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.fill(); }
+    }
+    const chromo = ramp(.702, .710) * (.42 - .29 * ramp(.712, .78));
+    if (chromo > .002) {
+      const a = chromo * (.9 + .1 * breathe(t, 9000)); ctx.strokeStyle = col('FFFFC0A4', a * .75); ctx.lineWidth = 1.1 * u; ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.stroke();
+      for (const [ang, size, k] of [[118, .085, 1], [196, .055, .7], [302, .07, .9], [58, .04, .55]]) { const rr = ang * Math.PI / 180; appBlob(ctx, sx + Math.cos(rr) * sunR * 1.01, sy + Math.sin(rr) * sunR * 1.01, size * sunR, 1, 1, [[0, withA('FF9A86', a * 1.6 * k)], [.5, withA('FF7A6E', a * .7 * k)], [1, '00FF7A6E']]); }
+    }
+    ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = '#05050C'; ctx.beginPath(); ctx.arc(sx + moonDx, sy, moonR, 0, TAU); ctx.fill(); ctx.restore();
+    for (const [bx, by, size, st, en, ph] of [[-56, 33, 3, .692, .702, 0], [-61, 22, 5.5, .693, .706, 1.7], [-64, 11, 3.5, .695, .709, 3.1], [-65, 0, 7, .694, .7155, .8], [-63.5, -13.5, 4.5, .696, .7075, 2.4], [-59.5, -26, 3, .692, .700, 4.2]]) {
+      const tt = (q - st) / (en - st); if (tt <= 0 || tt >= 1) continue;
+      const a = clamp(Math.min(1, tt / .18) * Math.min(1, (1 - tt) / .28) * (.72 + .28 * Math.sin(q * 1600 + ph)), 0, 1); if (a <= .01) continue;
+      const x = sx + bx * u, y = sy + by * u, r = size * u / 2; appBlob(ctx, x, y, r * 4.5, 1, 1, [[0, withA('FFFDF4', .55 * a)], [1, '00FFFDF4']]); ctx.fillStyle = col('FFFFFFFC', a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    }
+    const rt = (q - .704) / .021;
+    if (rt > 0 && rt < 1) {
+      const sc = rt < .52 ? .3 + 1.15 * (rt / .52) : 1.45 - .95 * ((rt - .52) / .48), a = Math.sin(Math.PI * rt) ** .8, cx = sx - 60 * u, cy = sy;
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy);
+      appBlob(ctx, cx, cy, 96 * u, 1, 128 / 192, [[0, withA('FFFDF2', .42 * a)], [.5, withA('FFF2D8', .14 * a)], [1, '00FFF2D8']]);
+      for (const [len, th, k, ang] of [[208, 3, 1, 0], [124, 3, .72, 90], [76, 2, .42, 45], [76, 2, .42, -45]]) {
+        const aa = a * k; if (aa <= .01) continue; ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang * Math.PI / 180); ctx.translate(-cx, -cy);
+        for (const [tk, mul] of [[th * 3.2 * u, .3], [th * u, 1]]) { const g = ctx.createLinearGradient(cx - len * u / 2, 0, cx + len * u / 2, 0); g.addColorStop(0, col('00FFF6DE')); g.addColorStop(.5, col('FFFFFDF4', aa * mul)); g.addColorStop(1, col('00FFF6DE')); ctx.fillStyle = g; ctx.fillRect(cx - len * u / 2, cy - tk / 2, len * u, tk); }
+        ctx.restore();
+      }
+      appBlob(ctx, cx, cy, 19 * u, 1, 1, [[0, withA('FFFFFF', .9 * a)], [.5, withA('FFF6DE', .3 * a)], [1, '00FFF6DE']]);
+      ctx.fillStyle = col('FFFFFFFF', a); ctx.beginPath(); ctx.arc(cx, cy, 5 * u, 0, TAU); ctx.fill(); ctx.restore();
+    }
+  },
+};
+
+LOCKS.eclipsePhoto = (function () { return {
+  eclipsePhoto(ctx, W, H, t, p, arrival) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF141628'], [.55, 'FF0E101E'], [1, 'FF090A14']]);
+    const WT = [0, .53, .83, 1], WP = [0, .64, .74, 1], WM = [1.208, .522, .547, 1.529];
+    const phase = x => { x = clamp(x, 0, 1); let i = 0; while (i < 2 && x > WT[i + 1]) i++; const hh = WT[i + 1] - WT[i], u = clamp((x - WT[i]) / hh, 0, 1), u2 = u * u, u3 = u2 * u;
+      return (2 * u3 - 3 * u2 + 1) * WP[i] + (u3 - 2 * u2 + u) * hh * WM[i] + (-2 * u3 + 3 * u2) * WP[i + 1] + (u3 - u2) * hh * WM[i + 1]; };
+    const q = phase(arrival), ramp = (a, b) => clamp((q - a) / (b - a), 0, 1);
+    const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235;
+    const moonR = 67 * u, moonDx = 142 * u * (1 - Math.min(1, q / .72)), crescent = Math.max(0, (moonDx - 2 * u) / u);
+    const day = clamp(1 - .10 * ramp(0, .44) - .55 * ramp(.44, .65) - .35 * ramp(.65, .709), 0, 1), veil = .64 * ramp(.44, .70);
+    const hot = ramp(.48, .72), alive = clamp(crescent / 3.5, 0, 1), cor = ramp(.705, .726), sv = ramp(.68, .82), hor = ramp(.70, .84), rush = ramp(.65, .73);
+    const swell = breathe(t, 16000), tA = breathe(t, 6000), tB = breathe(t, 8500), turn = (t / 420 * 360) % 360;
+    if (day > .004) {
+      appBlob(ctx, sx, sy, sunR * (1.2 + 1.55 * day), 1, 1, [[0, withA('FFE9BE', .18 * day)], [.42, withA('F6DDB4', .085 * day)], [.74, withA('D8C8A8', .03 * day)], [1, '00D8C8A8']]);
+      appBlob(ctx, sx, sy, w * 1.5, 1, 1, [[0, withA('9AA8C8', .07 * day)], [1, '009AA8C8']]);
+    }
+    if (veil > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF04050C', veil], [.62, 'FF05060E', veil * .88], [1, 'FF07080F', veil * .7]]); ctx.fillRect(0, 0, w, h); }
+    if (rush > .001 && rush < .999) { const a = .5 * Math.sin(Math.PI * rush) ** .6, bc = w * (-1.3 + 2.15 * rush), hf = w * .8, g = ctx.createLinearGradient(bc - hf, 0, bc + hf, 0); g.addColorStop(0, col('00040510')); g.addColorStop(.5, col('FF040510', a)); g.addColorStop(1, col('00040510')); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); }
+    if (sv > .004) {
+      [[.14, .09, 1.1, .6], [.29, .06, .9, .42], [.44, .11, 1, .5], [.62, .07, .9, .4], [.76, .12, 1.1, .55], [.90, .08, .9, .38], [.08, .22, 1, .45], [.35, .19, .9, .36], [.68, .24, 1, .44], [.92, .31, .9, .38], [.06, .40, 1, .4], [.24, .45, .9, .34], [.78, .43, 1, .42], [.50, .50, .9, .3], [.16, .58, .9, .32], [.88, .56, 1, .36]]
+        .forEach(([x, y, r, a], i) => { ctx.fillStyle = col('FFE8ECF8', a * sv * (.68 + .32 * (i % 2 ? tB : tA))); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); });
+      starGlow(ctx, .19 * w, .13 * h, 1.2, 'FFEFF2FA', (.5 + .45 * tB) * sv);
+      starGlow(ctx, sx - 2.9 * sunR, sy + 1.7 * sunR, 1.7, 'FFFFF4E2', .95 * sv); // Venus starGlow(ctx, .83 * w, .18 * h, 1, 'FFE6EAF6', (.45 + .45 * tA) * sv);
+    }
+    if (hor > .004) {
+      ctx.fillStyle = vstops(ctx, 0, h, [[0, '00FF9A6E'], [.7, '00FF9A6E'], [.88, 'FFE8875E', .07 * hor], [1, 'FFFFB07E', .17 * hor]]); ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FFB98A78', .05 * hor], [.16, '00B98A78'], [1, '00B98A78']]); ctx.fillRect(0, 0, w, h);
+    }
+    if (cor > .004) {
+      const b = cor * (.94 + .12 * swell), L = 1 / 2.7;
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.arc(sx, sy, sunR, 0, TAU, true); ctx.clip('evenodd');
+      ctx.globalAlpha = .22;
+      appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.08, withA('E7EFFB', .42 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.32, withA('E2EAF8', .16 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.72, withA('DAE3F4', .048 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [L * 2.25, withA('D6E0F2', .008 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
+      ctx.globalAlpha = 1;
+      // the real corona: NASA Goddard's photograph of totality, 2 July 2019, turning very slowly
+      if (CORONA.complete && CORONA.naturalWidth) { const size = 2 * sunR / CORONA_LIMB * (.985 + .03 * swell); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(b * .8, 0, 1); ctx.translate(sx, sy); ctx.rotate(turn * Math.PI / 360); ctx.drawImage(CORONA, -size / 2, -size / 2, size, size); ctx.restore(); }
+      drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, b * .3); // only the faint outer reach, past the photo's edge
+      appBlob(ctx, sx, sy, sunR * 1.16, 1, 1, [[0, '00F8FAFE'], [.845, '00F8FAFE'], [.875, withA('F8FAFE', .55 * b)], [.915, withA('EAF0FC', .24 * b)], [.96, withA('DCE6F8', .07 * b)], [1, '00DCE6F8']]);
+      ctx.restore();
+    }
+    if (alive > .004 && day > .004) { const a = (.30 + .42 * hot) * alive; appBlob(ctx, sx - .92 * hot * sunR, sy, sunR * (1.75 - .85 * hot), 1, 1, [[0, withA('FFFBF0', a)], [.5, withA('FFEFCE', a * .35)], [1, '00FFEFCE']]); }
+    const sunUp = crescent > 0;
+    if (sunUp && day > .004) { const gr = sunR + 34 * u * (.9 + .1 * breathe(t, 11000)); appBlob(ctx, sx, sy, gr, 1, 1, [[0, withA('FFF0CE', .5 * day)], [sunR / gr, withA('FFF0CE', .5 * day)], [1, '00FFF0CE']]); }
+    if (sunUp) {
+      ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = appGrad(ctx, sx - 5.2 * u, sy - 10.4 * u, sunR, [[0, 'FFFFFFFF'], [.34, 'FFFFFFFA'], [.62, 'FFFFF6DC'], [.84, 'FFFFE6B2'], [1, 'FFFCD190']]); ctx.fillRect(sx - sunR, sy - sunR, sunR * 2, sunR * 2); ctx.restore();
+      if (hot > .004) { ctx.fillStyle = col('FFFFFFFF', .85 * hot); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.fill(); }
+    }
+    const chromo = ramp(.702, .710) * (.42 - .29 * ramp(.712, .78));
+    if (chromo > .002) {
+      const a = chromo * (.9 + .1 * breathe(t, 9000)); ctx.strokeStyle = col('FFFFC0A4', a * .75); ctx.lineWidth = 1.1 * u; ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.stroke();
+      for (const [ang, size, k] of [[118, .085, 1], [196, .055, .7], [302, .07, .9], [58, .04, .55]]) { const rr = ang * Math.PI / 180; appBlob(ctx, sx + Math.cos(rr) * sunR * 1.01, sy + Math.sin(rr) * sunR * 1.01, size * sunR, 1, 1, [[0, withA('FF9A86', a * 1.6 * k)], [.5, withA('FF7A6E', a * .7 * k)], [1, '00FF7A6E']]); }
+    }
+    ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = appGrad(ctx, sx + moonDx - .25 * moonR, sy - .3 * moonR, moonR * 1.25, [[0, 'FF121521'], [.55, 'FF0B0D16'], [1, 'FF05050C']]); ctx.beginPath(); ctx.arc(sx + moonDx, sy, moonR, 0, TAU); ctx.fill(); ctx.restore();
+    for (const [bx, by, size, st, en, ph] of [[-56, 33, 3, .692, .702, 0], [-61, 22, 5.5, .693, .706, 1.7], [-64, 11, 3.5, .695, .709, 3.1], [-65, 0, 7, .694, .7155, .8], [-63.5, -13.5, 4.5, .696, .7075, 2.4], [-59.5, -26, 3, .692, .700, 4.2]]) {
+      const tt = (q - st) / (en - st); if (tt <= 0 || tt >= 1) continue;
+      const a = clamp(Math.min(1, tt / .18) * Math.min(1, (1 - tt) / .28) * (.72 + .28 * Math.sin(q * 1600 + ph)), 0, 1); if (a <= .01) continue;
+      const x = sx + bx * u, y = sy + by * u, r = size * u / 2; appBlob(ctx, x, y, r * 4.5, 1, 1, [[0, withA('FFFDF4', .55 * a)], [1, '00FFFDF4']]); ctx.fillStyle = col('FFFFFFFC', a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    }
+    const rt = (q - .704) / .021;
+    if (rt > 0 && rt < 1) {
+      const sc = rt < .52 ? .3 + 1.15 * (rt / .52) : 1.45 - .95 * ((rt - .52) / .48), a = Math.sin(Math.PI * rt) ** .8, cx = sx - 60 * u, cy = sy;
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy);
+      appBlob(ctx, cx, cy, 96 * u, 1, 128 / 192, [[0, withA('FFFDF2', .42 * a)], [.5, withA('FFF2D8', .14 * a)], [1, '00FFF2D8']]);
+      for (const [len, th, k, ang] of [[208, 3, 1, 0], [124, 3, .72, 90], [76, 2, .42, 45], [76, 2, .42, -45]]) {
+        const aa = a * k; if (aa <= .01) continue; ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang * Math.PI / 180); ctx.translate(-cx, -cy);
+        for (const [tk, mul] of [[th * 3.2 * u, .3], [th * u, 1]]) { const g = ctx.createLinearGradient(cx - len * u / 2, 0, cx + len * u / 2, 0); g.addColorStop(0, col('00FFF6DE')); g.addColorStop(.5, col('FFFFFDF4', aa * mul)); g.addColorStop(1, col('00FFF6DE')); ctx.fillStyle = g; ctx.fillRect(cx - len * u / 2, cy - tk / 2, len * u, tk); }
+        ctx.restore();
+      }
+      appBlob(ctx, cx, cy, 19 * u, 1, 1, [[0, withA('FFFFFF', .9 * a)], [.5, withA('FFF6DE', .3 * a)], [1, '00FFF6DE']]);
+      ctx.fillStyle = col('FFFFFFFF', a); ctx.beginPath(); ctx.arc(cx, cy, 5 * u, 0, TAU); ctx.fill(); ctx.restore();
+    }
+  }
+}.eclipsePhoto; })();
+let start = performance.now(), paused = false, pausedAt = 0;
+const els = [['a', 'eclipse'], ['b', 'eclipsePhoto']].map(([id, fn]) => { const c = document.getElementById(id); return { c, ctx: c.getContext('2d'), fn, scr: c.parentElement }; });
+function size() { for (const e of els) { const r = e.scr.getBoundingClientRect(); e.c.width = Math.round(r.width * DPR); e.c.height = Math.round(r.height * DPR); e.scr.style.setProperty('--k', r.width / 400); } }
+new ResizeObserver(size).observe(document.body); size();
+const t0 = performance.now();
+function frame(now) {
+  const el = (paused ? pausedAt : now) - start, t = (now - t0) / 1000;
+  for (const e of els) { e.ctx.setTransform(1, 0, 0, 1, 0, 0); LOCKS[e.fn](e.ctx, e.c.width, e.c.height, t, 0, el / 30000); e.ctx.setTransform(1, 0, 0, 1, 0, 0); }
+  document.getElementById('clock').textContent = (Math.min(el, 30000) / 1000).toFixed(1) + ' s' + (el >= 30000 ? ' · totality holds' : '');
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+document.getElementById('replay').onclick = () => { start = performance.now(); paused = false; document.getElementById('pause').textContent = 'Pause'; };
+document.getElementById('total').onclick = () => { start = performance.now() - 30000; paused = false; document.getElementById('pause').textContent = 'Pause'; };
+document.getElementById('pause').onclick = e => { paused = !paused; if (paused) pausedAt = performance.now(); else start += performance.now() - pausedAt; e.target.textContent = paused ? 'Resume' : 'Pause'; };
+})();
+</script></body></html>

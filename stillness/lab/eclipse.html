@@ -31,12 +31,12 @@ figcaption b{color:var(--gold);font-weight:500}
 @media (max-width:700px){.phone{--dh:min(82svh,560px)}}
 </style></head><body>
 <h1>Eclipse, now and with a real corona</h1>
-<p class="lead">Both phones play the app's 30-second arrival: the sun, the thinning crescent, Baily's beads, the diamond ring, then totality. On the right, the corona is a real photograph of totality, plus earthshine on the moon and Venus beside the sun.</p>
-<div class="ctrl"><button class="main" id="replay">Replay the arrival</button><button id="total">Jump to totality</button><button id="pause">Pause</button></div>
+<p class="lead">Both phones play the app's 30-second arrival: the sun, the thinning crescent, Baily's beads, the diamond ring, then totality. On the right: a real photographed corona; the moon's mountainous edge breaking the last light into Baily's beads; a softer diamond ring over the first ring of corona; a pink flash at the edge and prominences that stay; a limb-darkened sun whose glare shrinks with the crescent; earthshine and Venus. The beads and ring now take about four seconds instead of one.</p>
+<div class="ctrl"><button class="main" id="replay">Replay the arrival</button><button id="beads">Jump to the beads</button><button id="total">Jump to totality</button><button id="pause">Pause</button></div>
 <div class="clock" id="clock">0.0 s</div>
 <div class="pair">
   <figure><div class="phone"><div class="scr"><canvas id="a"></canvas><div class="lk"><div class="top">Full Lock · 45 minutes</div><div class="sp"></div><div class="n">45</div><div class="l">MINUTES</div><div class="rem">remaining</div><div class="sp"></div><div class="em">Emergency</div></div></div></div><figcaption>Now: drawn</figcaption></figure>
-  <figure><div class="phone"><div class="scr"><canvas id="b"></canvas><div class="lk"><div class="top">Full Lock · 45 minutes</div><div class="sp"></div><div class="n">45</div><div class="l">MINUTES</div><div class="rem">remaining</div><div class="sp"></div><div class="em">Emergency</div></div></div></div><figcaption><b>Proposed:</b> photo corona</figcaption></figure>
+  <figure><div class="phone"><div class="scr"><canvas id="b"></canvas><div class="lk"><div class="top">Full Lock · 45 minutes</div><div class="sp"></div><div class="n">45</div><div class="l">MINUTES</div><div class="rem">remaining</div><div class="sp"></div><div class="em">Emergency</div></div></div></div><figcaption><b>Proposed:</b> real corona, new arrival</figcaption></figure>
 </div>
 <p class="credit">Corona photograph: <a href="https://commons.wikimedia.org/wiki/File:Total_Solar_Eclipse_-_July_2,_2019_(48266572047).jpg">NASA Goddard Space Flight Center</a>, total solar eclipse of 2 July 2019, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>. Cropped, levelled and toned.</p>
 <script>
@@ -229,81 +229,108 @@ const LOCKS = {
   },
 };
 
-LOCKS.eclipsePhoto = (function () { return {
-  eclipsePhoto(ctx, W, H, t, p, arrival) {
-    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF141628'], [.55, 'FF0E101E'], [1, 'FF090A14']]);
-    const WT = [0, .53, .83, 1], WP = [0, .64, .74, 1], WM = [1.208, .522, .547, 1.529];
-    const phase = x => { x = clamp(x, 0, 1); let i = 0; while (i < 2 && x > WT[i + 1]) i++; const hh = WT[i + 1] - WT[i], u = clamp((x - WT[i]) / hh, 0, 1), u2 = u * u, u3 = u2 * u;
-      return (2 * u3 - 3 * u2 + 1) * WP[i] + (u3 - 2 * u2 + u) * hh * WM[i] + (-2 * u3 + 3 * u2) * WP[i + 1] + (u3 - u2) * hh * WM[i + 1]; };
-    const q = phase(arrival), ramp = (a, b) => clamp((q - a) / (b - a), 0, 1);
-    const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235;
-    const moonR = 67 * u, moonDx = 142 * u * (1 - Math.min(1, q / .72)), crescent = Math.max(0, (moonDx - 2 * u) / u);
-    const day = clamp(1 - .10 * ramp(0, .44) - .55 * ramp(.44, .65) - .35 * ramp(.65, .709), 0, 1), veil = .64 * ramp(.44, .70);
-    const hot = ramp(.48, .72), alive = clamp(crescent / 3.5, 0, 1), cor = ramp(.705, .726), sv = ramp(.68, .82), hor = ramp(.70, .84), rush = ramp(.65, .73);
-    const swell = breathe(t, 16000), tA = breathe(t, 6000), tB = breathe(t, 8500), turn = (t / 420 * 360) % 360;
-    if (day > .004) {
-      appBlob(ctx, sx, sy, sunR * (1.2 + 1.55 * day), 1, 1, [[0, withA('FFE9BE', .18 * day)], [.42, withA('F6DDB4', .085 * day)], [.74, withA('D8C8A8', .03 * day)], [1, '00D8C8A8']]);
-      appBlob(ctx, sx, sy, w * 1.5, 1, 1, [[0, withA('9AA8C8', .07 * day)], [1, '009AA8C8']]);
-    }
-    if (veil > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF04050C', veil], [.62, 'FF05060E', veil * .88], [1, 'FF07080F', veil * .7]]); ctx.fillRect(0, 0, w, h); }
-    if (rush > .001 && rush < .999) { const a = .5 * Math.sin(Math.PI * rush) ** .6, bc = w * (-1.3 + 2.15 * rush), hf = w * .8, g = ctx.createLinearGradient(bc - hf, 0, bc + hf, 0); g.addColorStop(0, col('00040510')); g.addColorStop(.5, col('FF040510', a)); g.addColorStop(1, col('00040510')); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); }
-    if (sv > .004) {
-      [[.14, .09, 1.1, .6], [.29, .06, .9, .42], [.44, .11, 1, .5], [.62, .07, .9, .4], [.76, .12, 1.1, .55], [.90, .08, .9, .38], [.08, .22, 1, .45], [.35, .19, .9, .36], [.68, .24, 1, .44], [.92, .31, .9, .38], [.06, .40, 1, .4], [.24, .45, .9, .34], [.78, .43, 1, .42], [.50, .50, .9, .3], [.16, .58, .9, .32], [.88, .56, 1, .36]]
-        .forEach(([x, y, r, a], i) => { ctx.fillStyle = col('FFE8ECF8', a * sv * (.68 + .32 * (i % 2 ? tB : tA))); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); });
-      starGlow(ctx, .19 * w, .13 * h, 1.2, 'FFEFF2FA', (.5 + .45 * tB) * sv);
-      starGlow(ctx, sx - 2.9 * sunR, sy + 1.7 * sunR, 1.7, 'FFFFF4E2', .95 * sv); // Venus starGlow(ctx, .83 * w, .18 * h, 1, 'FFE6EAF6', (.45 + .45 * tA) * sv);
-    }
-    if (hor > .004) {
-      ctx.fillStyle = vstops(ctx, 0, h, [[0, '00FF9A6E'], [.7, '00FF9A6E'], [.88, 'FFE8875E', .07 * hor], [1, 'FFFFB07E', .17 * hor]]); ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FFB98A78', .05 * hor], [.16, '00B98A78'], [1, '00B98A78']]); ctx.fillRect(0, 0, w, h);
-    }
-    if (cor > .004) {
-      const b = cor * (.94 + .12 * swell), L = 1 / 2.7;
-      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.arc(sx, sy, sunR, 0, TAU, true); ctx.clip('evenodd');
-      ctx.globalAlpha = .22;
-      appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.08, withA('E7EFFB', .42 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.32, withA('E2EAF8', .16 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.72, withA('DAE3F4', .048 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [L * 2.25, withA('D6E0F2', .008 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
-      ctx.globalAlpha = 1;
-      // the real corona: NASA Goddard's photograph of totality, 2 July 2019, turning very slowly
-      if (CORONA.complete && CORONA.naturalWidth) { const size = 2 * sunR / CORONA_LIMB * (.985 + .03 * swell); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(b * .8, 0, 1); ctx.translate(sx, sy); ctx.rotate(turn * Math.PI / 360); ctx.drawImage(CORONA, -size / 2, -size / 2, size, size); ctx.restore(); }
-      drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, b * .3); // only the faint outer reach, past the photo's edge
-      appBlob(ctx, sx, sy, sunR * 1.16, 1, 1, [[0, '00F8FAFE'], [.845, '00F8FAFE'], [.875, withA('F8FAFE', .55 * b)], [.915, withA('EAF0FC', .24 * b)], [.96, withA('DCE6F8', .07 * b)], [1, '00DCE6F8']]);
-      ctx.restore();
-    }
-    if (alive > .004 && day > .004) { const a = (.30 + .42 * hot) * alive; appBlob(ctx, sx - .92 * hot * sunR, sy, sunR * (1.75 - .85 * hot), 1, 1, [[0, withA('FFFBF0', a)], [.5, withA('FFEFCE', a * .35)], [1, '00FFEFCE']]); }
-    const sunUp = crescent > 0;
-    if (sunUp && day > .004) { const gr = sunR + 34 * u * (.9 + .1 * breathe(t, 11000)); appBlob(ctx, sx, sy, gr, 1, 1, [[0, withA('FFF0CE', .5 * day)], [sunR / gr, withA('FFF0CE', .5 * day)], [1, '00FFF0CE']]); }
-    if (sunUp) {
-      ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = appGrad(ctx, sx - 5.2 * u, sy - 10.4 * u, sunR, [[0, 'FFFFFFFF'], [.34, 'FFFFFFFA'], [.62, 'FFFFF6DC'], [.84, 'FFFFE6B2'], [1, 'FFFCD190']]); ctx.fillRect(sx - sunR, sy - sunR, sunR * 2, sunR * 2); ctx.restore();
-      if (hot > .004) { ctx.fillStyle = col('FFFFFFFF', .85 * hot); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.fill(); }
-    }
-    const chromo = ramp(.702, .710) * (.42 - .29 * ramp(.712, .78));
-    if (chromo > .002) {
-      const a = chromo * (.9 + .1 * breathe(t, 9000)); ctx.strokeStyle = col('FFFFC0A4', a * .75); ctx.lineWidth = 1.1 * u; ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.stroke();
-      for (const [ang, size, k] of [[118, .085, 1], [196, .055, .7], [302, .07, .9], [58, .04, .55]]) { const rr = ang * Math.PI / 180; appBlob(ctx, sx + Math.cos(rr) * sunR * 1.01, sy + Math.sin(rr) * sunR * 1.01, size * sunR, 1, 1, [[0, withA('FF9A86', a * 1.6 * k)], [.5, withA('FF7A6E', a * .7 * k)], [1, '00FF7A6E']]); }
-    }
-    ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = appGrad(ctx, sx + moonDx - .25 * moonR, sy - .3 * moonR, moonR * 1.25, [[0, 'FF121521'], [.55, 'FF0B0D16'], [1, 'FF05050C']]); ctx.beginPath(); ctx.arc(sx + moonDx, sy, moonR, 0, TAU); ctx.fill(); ctx.restore();
-    for (const [bx, by, size, st, en, ph] of [[-56, 33, 3, .692, .702, 0], [-61, 22, 5.5, .693, .706, 1.7], [-64, 11, 3.5, .695, .709, 3.1], [-65, 0, 7, .694, .7155, .8], [-63.5, -13.5, 4.5, .696, .7075, 2.4], [-59.5, -26, 3, .692, .700, 4.2]]) {
-      const tt = (q - st) / (en - st); if (tt <= 0 || tt >= 1) continue;
-      const a = clamp(Math.min(1, tt / .18) * Math.min(1, (1 - tt) / .28) * (.72 + .28 * Math.sin(q * 1600 + ph)), 0, 1); if (a <= .01) continue;
-      const x = sx + bx * u, y = sy + by * u, r = size * u / 2; appBlob(ctx, x, y, r * 4.5, 1, 1, [[0, withA('FFFDF4', .55 * a)], [1, '00FFFDF4']]); ctx.fillStyle = col('FFFFFFFC', a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
-    }
-    const rt = (q - .704) / .021;
-    if (rt > 0 && rt < 1) {
-      const sc = rt < .52 ? .3 + 1.15 * (rt / .52) : 1.45 - .95 * ((rt - .52) / .48), a = Math.sin(Math.PI * rt) ** .8, cx = sx - 60 * u, cy = sy;
-      ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy);
-      appBlob(ctx, cx, cy, 96 * u, 1, 128 / 192, [[0, withA('FFFDF2', .42 * a)], [.5, withA('FFF2D8', .14 * a)], [1, '00FFF2D8']]);
-      for (const [len, th, k, ang] of [[208, 3, 1, 0], [124, 3, .72, 90], [76, 2, .42, 45], [76, 2, .42, -45]]) {
-        const aa = a * k; if (aa <= .01) continue; ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang * Math.PI / 180); ctx.translate(-cx, -cy);
-        for (const [tk, mul] of [[th * 3.2 * u, .3], [th * u, 1]]) { const g = ctx.createLinearGradient(cx - len * u / 2, 0, cx + len * u / 2, 0); g.addColorStop(0, col('00FFF6DE')); g.addColorStop(.5, col('FFFFFDF4', aa * mul)); g.addColorStop(1, col('00FFF6DE')); ctx.fillStyle = g; ctx.fillRect(cx - len * u / 2, cy - tk / 2, len * u, tk); }
-        ctx.restore();
-      }
-      appBlob(ctx, cx, cy, 19 * u, 1, 1, [[0, withA('FFFFFF', .9 * a)], [.5, withA('FFF6DE', .3 * a)], [1, '00FFF6DE']]);
-      ctx.fillStyle = col('FFFFFFFF', a); ctx.beginPath(); ctx.arc(cx, cy, 5 * u, 0, TAU); ctx.fill(); ctx.restore();
+// The proposed Eclipse: the photographed corona, and an arrival rebuilt to read like a real one.
+// Timeline in seconds of the 30-second arrival (T): the partial phase thins the crescent until 17 s;
+// 17 to 21 s the moon's mountainous edge breaks the last light into Baily's beads, the last bead
+// flaring into the diamond ring as the inner corona appears; a pink flash of chromosphere, then totality.
+const MOON_EDGE = (() => {          // the moon's edge: valleys and peaks, as a radius offset per angle
+  const n = 720, h = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const f = i / n * TAU; h[i] = .55 * Math.sin(7 * f + 1.3) + .3 * Math.sin(13 * f + .4) + .25 * Math.sin(23 * f + 2.1) + .16 * Math.sin(41 * f + .7) + .1 * Math.sin(67 * f + 4.2); }
+  let m = 0; for (const v of h) m = Math.max(m, Math.abs(v)); for (let i = 0; i < n; i++) h[i] /= m;
+  return phi => { const k = ((phi / TAU) % 1 + 1) % 1 * n; const i = Math.floor(k), f = k - i; return h[i % n] * (1 - f) + h[(i + 1) % n] * f; };
+})();
+function eclipseReal(ctx, W, H, t, p, arrival) {
+  const [w, h] = dpFrame(ctx, W, H, [[0, 'FF141628'], [.55, 'FF0E101E'], [1, 'FF090A14']]);
+  const T = clamp(arrival, 0, 1.0001) * 30, ramp = (a, b) => clamp((T - a) / (b - a), 0, 1), ss = x => x * x * (3 - 2 * x);
+  const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235, moonR = 67 * u, amp = u * (.15 + .85 * (1 - clamp((T - 20.6) / 1.4, 0, 1)));
+  // the moon's offset: quick through the long partial phase, then crawling through the beads
+  const dx = T < 17 ? 3.4 * u + 138.6 * u * (1 - T / 17) ** 2.2
+           : T < 21 ? 3.4 * u - 2.9 * u * ((T - 17) / 4) : Math.max(0, .5 * u * (1 - (T - 21) / 9));
+  const mx = sx + dx;
+  const day = clamp(1 - .10 * ramp(0, 12) - .55 * ramp(12, 17) - .35 * ramp(17, 20.6), 0, 1);
+  const veil = .64 * ramp(12, 20.5), stars = ramp(20, 24), hor = ramp(20.5, 25.5), rush = ramp(16, 20.6);
+  const cor = ss(ramp(18.6, 21.6)), swell = breathe(t, 16000), turn = (t / 420 * 360) % 360;
+  // how much of the sun's edge still shows past the moon's mountains, and where
+  let light = 0, lx = 0, ly = 0; const beads = [];
+  for (let i = 0; i < 360; i++) {
+    const th = i / 360 * TAU, px = sx + Math.cos(th) * sunR, py = sy + Math.sin(th) * sunR;
+    const g = Math.hypot(px - mx, py - sy) - (moonR + amp * MOON_EDGE(Math.atan2(py - sy, px - mx)));
+    if (g > 0) { const k = Math.min(g, 3 * u); light += k; lx += px * k; ly += py * k; if (g < 6 * u) beads.push([px, py, g]); }
+  }
+  const vis = clamp(dx / (142 * u), 0, 1);            // rough share of the sun still showing
+  if (day > .004) {
+    appBlob(ctx, sx, sy, sunR * (1.15 + 1.6 * day * (.35 + .65 * vis ** .5)), 1, 1, [[0, withA('FFE9BE', .18 * day)], [.42, withA('F6DDB4', .085 * day)], [.74, withA('D8C8A8', .03 * day)], [1, '00D8C8A8']]);
+    appBlob(ctx, sx, sy, w * 1.5, 1, 1, [[0, withA('9AA8C8', .07 * day)], [1, '009AA8C8']]);
+  }
+  if (veil > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF04050C', veil], [.62, 'FF05060E', veil * .88], [1, 'FF07080F', veil * .7]]); ctx.fillRect(0, 0, w, h); }
+  if (rush > .001 && rush < .999) { const a = .5 * Math.sin(Math.PI * rush) ** .6, bc = w * (-1.3 + 2.15 * rush), hf = w * .8, g = ctx.createLinearGradient(bc - hf, 0, bc + hf, 0); g.addColorStop(0, col('00040510')); g.addColorStop(.5, col('FF040510', a)); g.addColorStop(1, col('00040510')); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); }
+  if (stars > .004) {
+    const tA = breathe(t, 6000), tB = breathe(t, 8500);
+    [[.14, .09, 1.1, .6], [.29, .06, .9, .42], [.44, .11, 1, .5], [.62, .07, .9, .4], [.76, .12, 1.1, .55], [.90, .08, .9, .38], [.08, .22, 1, .45], [.35, .19, .9, .36], [.68, .24, 1, .44], [.92, .31, .9, .38], [.06, .40, 1, .4], [.24, .45, .9, .34], [.78, .43, 1, .42], [.50, .50, .9, .3], [.16, .58, .9, .32], [.88, .56, 1, .36]]
+      .forEach(([x, y, r, a], i) => { ctx.fillStyle = col('FFE8ECF8', a * stars * (.68 + .32 * (i % 2 ? tB : tA))); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); });
+    starGlow(ctx, .19 * w, .13 * h, 1.2, 'FFEFF2FA', (.5 + .45 * tB) * stars); starGlow(ctx, .83 * w, .18 * h, 1, 'FFE6EAF6', (.45 + .45 * tA) * stars);
+    starGlow(ctx, sx - 2.9 * sunR, sy + 1.7 * sunR, 1.7, 'FFFFF4E2', .95 * stars); // Venus
+  }
+  if (hor > .004) {
+    ctx.fillStyle = vstops(ctx, 0, h, [[0, '00FF9A6E'], [.7, '00FF9A6E'], [.88, 'FFE8875E', .07 * hor], [1, 'FFFFB07E', .17 * hor]]); ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FFB98A78', .05 * hor], [.16, '00B98A78'], [1, '00B98A78']]); ctx.fillRect(0, 0, w, h);
+  }
+  // the corona, arriving with the beads: a faint drawn glow, the photograph, and only the outermost drawn streamers
+  if (cor > .004) {
+    const b = cor * (.94 + .12 * swell), L = 1 / 2.7;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.arc(sx, sy, sunR, 0, TAU, true); ctx.clip('evenodd');
+    ctx.globalAlpha = .22;
+    appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.08, withA('E7EFFB', .42 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.32, withA('E2EAF8', .16 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.72, withA('DAE3F4', .048 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [L * 2.25, withA('D6E0F2', .008 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
+    ctx.globalAlpha = 1;
+    if (CORONA.complete && CORONA.naturalWidth) { const size = 2 * sunR / CORONA_LIMB * (.985 + .03 * swell); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(b * .8, 0, 1); ctx.translate(sx, sy); ctx.rotate(turn * Math.PI / 360); ctx.drawImage(CORONA, -size / 2, -size / 2, size, size); ctx.restore(); }
+    drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, b * .3);
+    ctx.restore();
+  }
+  // the sun: limb-darkened, white at the centre, warmer and dimmer towards the edge
+  if (light > 0 || dx > 2 * u) {
+    ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip();
+    ctx.fillStyle = appGrad(ctx, sx, sy, sunR, [[0, 'FFFFFFFF'], [.55, 'FFFFFEF6'], [.8, 'FFFFF3D6'], [.94, 'FFFFE2AE'], [1, 'FFF6C886']]); ctx.fillRect(sx - sunR, sy - sunR, 2 * sunR, 2 * sunR);
+    ctx.restore();
+    // glare that shrinks as the crescent thins
+    const gr = sunR + 34 * u * (.25 + .75 * vis ** .5) * (.9 + .1 * breathe(t, 11000));
+    if (day > .004) appBlob(ctx, sx, sy, gr, 1, 1, [[0, withA('FFF0CE', .5 * day * (.4 + .6 * vis ** .4))], [sunR / gr, withA('FFF0CE', .5 * day * (.4 + .6 * vis ** .4))], [1, '00FFF0CE']]);
+  }
+  // the moon, with its mountains; a faintly lit body (earthshine) rather than a hole
+  ctx.save();
+  if (cor < .02) { ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); }
+  ctx.beginPath();
+  for (let i = 0; i <= 360; i++) { const f = i / 360 * TAU, r = moonR + amp * MOON_EDGE(f); i ? ctx.lineTo(mx + Math.cos(f) * r, sy + Math.sin(f) * r) : ctx.moveTo(mx + Math.cos(f) * r, sy + Math.sin(f) * r); }
+  ctx.fillStyle = appGrad(ctx, mx - .25 * moonR, sy - .3 * moonR, moonR * 1.25, [[0, 'FF0E1019'], [.55, 'FF090B12'], [1, 'FF05050C']]); ctx.fill();
+  ctx.restore();
+  // Baily's beads: sunlight through the valleys, each a soft point that flickers as it narrows
+  if (T > 16.5 && light > 0) {
+    for (const [px, py, g] of beads) { const k = clamp(g / (2.2 * u), 0, 1), fl = .8 + .2 * Math.sin(t * 9 + px * .7); appBlob(ctx, px, py, (2.5 + 5 * k) * u, 1, 1, [[0, withA('FFFDF4', .32 * k * fl)], [1, '00FFFDF4']]); }
+  }
+  // the diamond ring: as the light dwindles to the last bead it blazes, over the ring of inner corona
+  const dia = light > 0 ? clamp(1 - light / (70 * u), 0, 1) * ramp(16.5, 18) : 0;
+  if (dia > .01) {
+    const cx = lx / light, cy = ly / light, s = Math.min(1, light / (6 * u)) ** .35;   // fades as the last bead goes out
+    const a = dia * s;
+    appBlob(ctx, cx, cy, (38 + 34 * dia) * u, 1, 1, [[0, withA('FFFDF2', .62 * a)], [.18, withA('FFF6E0', .3 * a)], [.5, withA('FFF0D8', .08 * a)], [1, '00FFF0D8']]);
+    appBlob(ctx, cx, cy, 9 * u, 1, 1, [[0, withA('FFFFFF', a)], [.5, withA('FFFFFF', .6 * a)], [1, '00FFFFFF']]);
+    // a faint, short starburst; the eye sees a soft flare more than camera spikes
+    for (const [ang, len] of [[8, 70], [98, 46], [53, 30], [-37, 30]]) {
+      const r = ang * Math.PI / 180, ex = Math.cos(r) * len * u, ey = Math.sin(r) * len * u, g = ctx.createLinearGradient(cx - ex, cy - ey, cx + ex, cy + ey);
+      g.addColorStop(0, col('00FFF6DE')); g.addColorStop(.5, col('FFFFFDF4', .22 * a)); g.addColorStop(1, col('00FFF6DE')); ctx.strokeStyle = g; ctx.lineWidth = 1.4 * u; ctx.beginPath(); ctx.moveTo(cx - ex, cy - ey); ctx.lineTo(cx + ex, cy + ey); ctx.stroke();
     }
   }
-}.eclipsePhoto; })();
+  // the chromosphere: a thin pink arc where the last light went out, for a few seconds; prominences stay
+  const flash = ramp(20.4, 20.9) * (1 - ramp(21.6, 23.5));
+  if (flash > .004) { ctx.strokeStyle = col('FFFF9E8C', .75 * flash); ctx.lineWidth = 1.6 * u; ctx.beginPath(); ctx.arc(sx, sy, sunR + .6 * u, Math.PI - .75, Math.PI + .75); ctx.stroke(); }
+  const prom = ramp(20.5, 21.2) * (1 - .62 * ramp(22, 26));
+  if (prom > .004) for (const [ang, size, k] of [[164, .075, 1], [196, .05, .8], [302, .065, .9], [58, .04, .6]]) {
+    const r = ang * Math.PI / 180; appBlob(ctx, sx + Math.cos(r) * sunR * 1.02, sy + Math.sin(r) * sunR * 1.02, size * sunR, 1.3, 1, [[0, withA('FF9A86', .9 * prom * k)], [.5, withA('FF7A6E', .38 * prom * k)], [1, '00FF7A6E']], ang + 90, sx + Math.cos(r) * sunR * 1.02, sy + Math.sin(r) * sunR * 1.02);
+  }
+}
+
+LOCKS.eclipseReal = eclipseReal;
 let start = performance.now(), paused = false, pausedAt = 0;
-const els = [['a', 'eclipse'], ['b', 'eclipsePhoto']].map(([id, fn]) => { const c = document.getElementById(id); return { c, ctx: c.getContext('2d'), fn, scr: c.parentElement }; });
+const els = [['a', 'eclipse'], ['b', 'eclipseReal']].map(([id, fn]) => { const c = document.getElementById(id); return { c, ctx: c.getContext('2d'), fn, scr: c.parentElement }; });
 function size() { for (const e of els) { const r = e.scr.getBoundingClientRect(); e.c.width = Math.round(r.width * DPR); e.c.height = Math.round(r.height * DPR); e.scr.style.setProperty('--k', r.width / 400); } }
 new ResizeObserver(size).observe(document.body); size();
 const t0 = performance.now();
@@ -314,7 +341,9 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+window.seekEclipse = s => { pausedAt = performance.now(); start = pausedAt - s * 1000; paused = true; }; // hold a moment, for checking
 document.getElementById('replay').onclick = () => { start = performance.now(); paused = false; document.getElementById('pause').textContent = 'Pause'; };
+document.getElementById('beads').onclick = () => { start = performance.now() - 16000; paused = false; document.getElementById('pause').textContent = 'Pause'; };
 document.getElementById('total').onclick = () => { start = performance.now() - 30000; paused = false; document.getElementById('pause').textContent = 'Pause'; };
 document.getElementById('pause').onclick = e => { paused = !paused; if (paused) pausedAt = performance.now(); else start += performance.now() - pausedAt; e.target.textContent = paused ? 'Resume' : 'Pause'; };
 })();

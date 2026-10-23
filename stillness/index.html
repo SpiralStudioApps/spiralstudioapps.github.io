@@ -594,7 +594,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <span>Made with care by Spiral Studio</span>
     <span><a href="guides/">Guides</a> &nbsp;·&nbsp; <a href="https://spiralstudioapps.github.io/stillness-privacy/">Privacy</a> &nbsp;·&nbsp; <a href="https://spiralstudioapps.github.io/stillness-terms/">Terms</a> &nbsp;·&nbsp; <a href="mailto:spiralstudio.apps@gmail.com">spiralstudio.apps@gmail.com</a></span>
   </div>
-  <div class="wrap" style="margin-top:10px;font-size:12px;opacity:.7">Google Play and the Google Play logo are trademarks of Google LLC.</div>
+  <div class="wrap" style="margin-top:10px;font-size:12px;opacity:.7"><span>Google Play and the Google Play logo are trademarks of Google LLC. Eclipse corona: <a href="https://commons.wikimedia.org/wiki/File:Total_Solar_Eclipse_-_July_2,_2019_(48266572047).jpg">photo by NASA Goddard</a>, CC BY 2.0.</span></div>
 </footer>
 
 <script>
@@ -625,7 +625,6 @@ function stars(ctx, w, h, t, { maxY = 1, alpha = .6, drift = 0, color = [230, 23
     const r = (.35 + s.s * 1.15) * DPR; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
   }
 }
-const STREAMERS = (() => { const r = rng(11); return Array.from({ length: 46 }, () => ({ a: r() * TAU, l: 1.4 + r() * 1.5, s: r(), w: .5 + r() * 1.1 })); })();
 
 /* ── the five skies (palettes from the app's lock screens) ───── */
 const SKY = {
@@ -687,21 +686,12 @@ const SKY = {
     vgrad(ctx, w, h, [[0, '#141628'], [.55, '#0E101E'], [1, '#090A14']]);
     stars(ctx, w, h, t, { alpha: .5 });
     if (!sun) { const g = ctx.createLinearGradient(0, h * .62, 0, h); g.addColorStop(0, 'rgba(232,135,94,0)'); g.addColorStop(.7, 'rgba(232,135,94,.06)'); g.addColorStop(1, 'rgba(255,176,126,.15)'); ctx.fillStyle = g; ctx.fillRect(0, h * .62, w, h * .38); return; }
-    const cx = w * .5, cy = h * (w > h ? .2 : .24), r = Math.min(w, h) * .11; // high and central, clear of the phones
-    blob(ctx, cx, cy, r * 7, 1, 1, [[0, rgba([255, 233, 190], .1)], [.4, rgba([246, 221, 180], .04)], [1, rgba([216, 200, 168], 0)]]);
-    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(cx, cy); ctx.rotate(t * .012);
-    for (const s of STREAMERS) {
-      const L = r * (s.l + .18 * Math.sin(t * .35 + s.a * 3)), ex = Math.cos(s.a) * L, ey = Math.sin(s.a) * L;
-      const g = ctx.createLinearGradient(0, 0, ex, ey);
-      g.addColorStop(0, rgba([242, 230, 196], 0)); g.addColorStop(clamp(r / L, 0, 1), rgba([242, 230, 196], .26 * s.s + .07)); g.addColorStop(1, rgba([242, 230, 196], 0));
-      ctx.strokeStyle = g; ctx.lineWidth = s.w * DPR; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(ex, ey); ctx.stroke();
-    }
-    ctx.restore();
-    blob(ctx, cx, cy, r * 2.5, 1, 1, [[0, rgba([242, 230, 196], .62)], [.4, rgba([242, 230, 196], .46)], [.5, rgba([226, 208, 160], .2)], [1, rgba([226, 208, 160], 0)]]);
-    ctx.fillStyle = '#06070d'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fill();
-    ctx.strokeStyle = rgba([248, 240, 222], .55); ctx.lineWidth = 1.2 * DPR; ctx.stroke();
-    const ph = (t % 18) / 18;
-    if (ph < .1) glow(ctx, cx + Math.cos(-.9) * r, cy + Math.sin(-.9) * r, 9 * DPR, [255, 248, 230], Math.sin(ph / .1 * Math.PI));
+    const cx = w * .5, cy = h * (w > h ? .2 : .24), r = Math.min(w, h) * .11, swell = breathe(t, 16000); // high and central, clear of the phones
+    blob(ctx, cx, cy, r * 7, 1, 1, [[0, rgba([238, 242, 252], .07)], [.4, rgba([226, 232, 246], .03)], [1, rgba([216, 224, 242], 0)]]);
+    photoCorona(ctx, CORONA_IMG.sky, cx, cy, r, swell, (t / 420 * 360) * .5 % 360, .85);
+    for (const [ang, size, k] of PROMINENCES) prominence(ctx, cx, cy, r, ang, size, .5 * k);
+    ctx.fillStyle = appGrad(ctx, cx - .25 * r, cy - .3 * r, r * 1.25, [[0, 'FF0E1019'], [.55, 'FF090B12'], [1, 'FF05050C']]);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fill();
   }
 };
 
@@ -776,16 +766,54 @@ function drawCoronaField(ctx, f, x, y, limbR, turnDeg, alpha) {
   }
   ctx.restore();
 }
-const ORB_CORONA = coronaField('FFF2ECDC', .62, 58, 3, .18, .40);
 const SKY_CORONA = coronaField('FFE9F0FC', .34, 112, 2, .14, 1.55);
-// the orb's corona (drawSphereCorona): warm bloom, turning streamers, pearl rim, all outside the limb
-function orbCorona(ctx, x, y, d, t, alpha) {
-  if (alpha <= .004) return; const swell = breathe(t, 16000), turn = (t / 420 * 360) % 360;
-  ctx.save(); ctx.globalAlpha = alpha * (.88 + .12 * swell);
-  appBlob(ctx, x, y, d * 1.368 / 2 * (.97 + .06 * swell), 1, 1, [[0, '00FAF4E4'], [.35, '00FAF4E4'], [.39, '57FAF4E4'], [.49, '24EADCBE'], [.64, '0ADACAAA'], [.82, '00DACAAA'], [1, '00DACAAA']]);
-  ctx.restore(); drawCoronaField(ctx, ORB_CORONA, x, y, d / 2, turn, alpha);
-  ctx.save(); ctx.globalAlpha = alpha; appBlob(ctx, x, y, d * 1.189 / 2, 1, 1, [[0, '00F8FAFE'], [.81, '00F8FAFE'], [.85, '8CF8FAFE'], [.9, '42E8EEFA'], [.95, '14D8E2F4'], [1, '00D8E2F4']]); ctx.restore();
+// Eclipse's corona is a real one, as in the app (ui/theme/EclipseCorona.kt): NASA Goddard's photograph of the
+// total eclipse of 2 July 2019 (CC BY 2.0, credited in the footer), its brightness turned into alpha over a pearl
+// white. Each texture is centred on the moon, whose limb sits at CORONA_LIMB of its half-width: 'sky' has the
+// full reach (lock screen), 'orb' fades out by ~1.75 limbs (home orb), 'small' is for orbs under 120 dp.
+const CORONA_LIMB = .4535, CORONA_IMG = {};
+for (const k of ['sky', 'orb', 'small']) { const im = new Image(); im.src = `img/eclipse-corona-${k}.webp`; CORONA_IMG[k] = im; }
+function photoCorona(ctx, im, x, y, limbR, swell, rotDeg, alpha) {
+  if (alpha <= .004 || limbR <= 0 || !im.complete || !im.naturalWidth) return;
+  const size = 2 * limbR / CORONA_LIMB * (.985 + .03 * swell);
+  ctx.save(); ctx.globalAlpha = clamp(alpha, 0, 1); ctx.imageSmoothingQuality = 'high'; ctx.translate(x, y); ctx.rotate(rotDeg * Math.PI / 180);
+  ctx.drawImage(im, -size / 2, -size / 2, size, size); ctx.restore();
 }
+// a pink prominence just outside the limb: a soft, slightly flattened glow along the edge at angDeg (0° = 3 o'clock)
+const PROMINENCES = [[164, .075, 1], [196, .05, .8], [302, .065, .9], [58, .04, .6]];
+function prominence(ctx, x, y, limbR, angDeg, sizeFrac, a) {
+  if (a <= .004) return; const r = angDeg * Math.PI / 180, px = x + Math.cos(r) * limbR * 1.02, py = y + Math.sin(r) * limbR * 1.02;
+  appBlob(ctx, px, py, sizeFrac * limbR, 1.3, 1, [[0, withA('FF9A86', a)], [.5, withA('FF7A6E', a * .4)], [1, '00FF7A6E']], angDeg + 90, px, py);
+}
+// the diamond ring: one blinding point on the rim, a soft flare round it, a faint short starburst (u: one dp)
+function diamond(ctx, x, y, k, u, glow = 34 + 40 * k) {
+  if (k <= .004) return;
+  appBlob(ctx, x, y, glow * u, 1, 1, [[0, withA('FFFDF2', .7 * k)], [.18, withA('FFF6E0', .32 * k)], [.5, withA('FFF0D8', .08 * k)], [1, '00FFF0D8']]);
+  appBlob(ctx, x, y, 8 * u, 1, 1, [[0, withA('FFFFFF', k)], [.5, withA('FFFFFF', .6 * k)], [1, '00FFFFFF']]);
+  ctx.lineCap = 'round'; ctx.lineWidth = 1.3 * u;
+  for (const [ang, len] of [[8, 60], [98, 40], [53, 26], [-37, 26]]) {
+    const r = ang * Math.PI / 180, ex = Math.cos(r) * len * u, ey = Math.sin(r) * len * u, g = ctx.createLinearGradient(x - ex, y - ey, x + ex, y + ey);
+    g.addColorStop(0, col('00FFF6DE')); g.addColorStop(.5, col('FFFFFDF4', .25 * k)); g.addColorStop(1, col('00FFF6DE'));
+    ctx.strokeStyle = g; ctx.beginPath(); ctx.moveTo(x - ex, y - ey); ctx.lineTo(x + ex, y + ey); ctx.stroke();
+  }
+}
+// the orb's corona (BreathingOrb / SkySphere): a faint warm bloom, the photograph, two prominences, all outside
+// the limb (the sphere is drawn on top, so its edge stays crisp)
+function orbCorona(ctx, x, y, d, t, alpha, im = CORONA_IMG.orb) {
+  if (alpha <= .004) return; const swell = breathe(t, 16000), turn = (t / 420 * 360) % 360;
+  ctx.save(); ctx.globalAlpha = .25 * alpha;
+  appBlob(ctx, x, y, d * 1.368 / 2 * (.97 + .06 * swell), 1, 1, [[0, '00FAF4E4'], [.35, '00FAF4E4'], [.39, '57FAF4E4'], [.49, '24EADCBE'], [.64, '0ADACAAA'], [.82, '00DACAAA'], [1, '00DACAAA']]);
+  ctx.restore();
+  photoCorona(ctx, im, x, y, d / 2, swell, turn * .5, .85 * alpha);
+  prominence(ctx, x, y, d / 2, 164, .075, .55 * alpha); prominence(ctx, x, y, d / 2, 302, .06, .44 * alpha);
+}
+// the moon's edge: valleys and peaks, as a radius offset per angle (EclipseBackground.kt moonEdge)
+const MOON_EDGE = (() => {
+  const n = 720, h = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const f = i / n * TAU; h[i] = .55 * Math.sin(7 * f + 1.3) + .3 * Math.sin(13 * f + .4) + .25 * Math.sin(23 * f + 2.1) + .16 * Math.sin(41 * f + .7) + .1 * Math.sin(67 * f + 4.2); }
+  let m = 0; for (const v of h) m = Math.max(m, Math.abs(v)); for (let i = 0; i < n; i++) h[i] /= m;
+  return phi => { const k = ((phi / TAU) % 1 + 1) % 1 * n; const i = Math.floor(k), f = k - i; return h[i % n] * (1 - f) + h[(i + 1) % n] * f; };
+})();
 
 const LOCKS = {
   // OceanBackground.kt: breathing skylight sheen and five swell crests
@@ -843,72 +871,83 @@ const LOCKS = {
     }
     ctx.fillStyle = vstops(ctx, .8 * h, h, [[0, '0004070B'], [1, 'D904070B']]); ctx.fillRect(0, .8 * h, w, .2 * h);
   },
-  // EclipseBackground.kt: the 30-second arrival (sun, crescent, Baily's beads, diamond ring) then totality
+  // EclipseBackground.kt: the 30-second arrival. The partial phase runs quickly; from 17 to 21 s the moon's
+  // mountainous edge breaks the last light into Baily's beads, the last bead flaring into the diamond ring as the
+  // photographed corona comes up; a pink flash of chromosphere, then totality holds.
   eclipse(ctx, W, H, t, p, arrival) {
     const [w, h] = dpFrame(ctx, W, H, [[0, 'FF141628'], [.55, 'FF0E101E'], [1, 'FF090A14']]);
-    const WT = [0, .53, .83, 1], WP = [0, .64, .74, 1], WM = [1.208, .522, .547, 1.529];
-    const phase = x => { x = clamp(x, 0, 1); let i = 0; while (i < 2 && x > WT[i + 1]) i++; const hh = WT[i + 1] - WT[i], u = clamp((x - WT[i]) / hh, 0, 1), u2 = u * u, u3 = u2 * u;
-      return (2 * u3 - 3 * u2 + 1) * WP[i] + (u3 - 2 * u2 + u) * hh * WM[i] + (-2 * u3 + 3 * u2) * WP[i + 1] + (u3 - u2) * hh * WM[i + 1]; };
-    const q = phase(arrival), ramp = (a, b) => clamp((q - a) / (b - a), 0, 1);
-    const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235;
-    const moonR = 67 * u, moonDx = 142 * u * (1 - Math.min(1, q / .72)), crescent = Math.max(0, (moonDx - 2 * u) / u);
-    const day = clamp(1 - .10 * ramp(0, .44) - .55 * ramp(.44, .65) - .35 * ramp(.65, .709), 0, 1), veil = .64 * ramp(.44, .70);
-    const hot = ramp(.48, .72), alive = clamp(crescent / 3.5, 0, 1), cor = ramp(.705, .726), sv = ramp(.68, .82), hor = ramp(.70, .84), rush = ramp(.65, .73);
-    const swell = breathe(t, 16000), tA = breathe(t, 6000), tB = breathe(t, 8500), turn = (t / 420 * 360) % 360;
+    const T = clamp(arrival, 0, 1.0001) * 30, ramp = (a, b) => clamp((T - a) / (b - a), 0, 1), ss = x => x * x * (3 - 2 * x);
+    const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235, moonR = 67 * u;
+    // mountains only matter at contact: round on the approach, edged through the beads, a clean circle at totality
+    const amp = u * (.15 + .85 * ramp(15.6, 16.8) * (1 - ramp(20.6, 22))) * ramp(15, 15.6);
+    const dx = T < 17 ? 3.4 * u + 138.6 * u * (1 - T / 17) ** 2.2 : T < 21 ? 3.4 * u - 2.9 * u * ((T - 17) / 4) : Math.max(0, .5 * u * (1 - (T - 21) / 9));
+    const mx = sx + dx;
+    const day = clamp(1 - .10 * ramp(0, 12) - .55 * ramp(12, 17) - .35 * ramp(17, 20.6), 0, 1);
+    const veil = .64 * ramp(12, 20.5), stars = ramp(20, 24), hor = ramp(20.5, 25.5), rush = ramp(16, 20.6);
+    const cor = ss(ramp(18.6, 21.6)), swell = breathe(t, 16000), turn = (t / 420 * 360) % 360, vis = clamp(dx / (142 * u), 0, 1);
+    // how much of the sun's edge still shows past the moon's mountains, and where
+    let light = 0, lx = 0, ly = 0; const beads = [];
+    for (let i = 0; i < 360; i++) {
+      const th = i / 360 * TAU, px = sx + Math.cos(th) * sunR, py = sy + Math.sin(th) * sunR;
+      const g = Math.hypot(px - mx, py - sy) - (moonR + amp * MOON_EDGE(Math.atan2(py - sy, px - mx)));
+      if (g > 0) { const k = Math.min(g, 3 * u); light += k; lx += px * k; ly += py * k; if (g < 6 * u) beads.push([px, py, g]); }
+    }
     if (day > .004) {
-      appBlob(ctx, sx, sy, sunR * (1.2 + 1.55 * day), 1, 1, [[0, withA('FFE9BE', .18 * day)], [.42, withA('F6DDB4', .085 * day)], [.74, withA('D8C8A8', .03 * day)], [1, '00D8C8A8']]);
+      appBlob(ctx, sx, sy, sunR * (1.15 + 1.6 * day * (.35 + .65 * vis ** .5)), 1, 1, [[0, withA('FFE9BE', .18 * day)], [.42, withA('F6DDB4', .085 * day)], [.74, withA('D8C8A8', .03 * day)], [1, '00D8C8A8']]);
       appBlob(ctx, sx, sy, w * 1.5, 1, 1, [[0, withA('9AA8C8', .07 * day)], [1, '009AA8C8']]);
     }
     if (veil > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF04050C', veil], [.62, 'FF05060E', veil * .88], [1, 'FF07080F', veil * .7]]); ctx.fillRect(0, 0, w, h); }
     if (rush > .001 && rush < .999) { const a = .5 * Math.sin(Math.PI * rush) ** .6, bc = w * (-1.3 + 2.15 * rush), hf = w * .8, g = ctx.createLinearGradient(bc - hf, 0, bc + hf, 0); g.addColorStop(0, col('00040510')); g.addColorStop(.5, col('FF040510', a)); g.addColorStop(1, col('00040510')); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); }
-    if (sv > .004) {
+    if (stars > .004) {
+      const tA = breathe(t, 6000), tB = breathe(t, 8500);
       [[.14, .09, 1.1, .6], [.29, .06, .9, .42], [.44, .11, 1, .5], [.62, .07, .9, .4], [.76, .12, 1.1, .55], [.90, .08, .9, .38], [.08, .22, 1, .45], [.35, .19, .9, .36], [.68, .24, 1, .44], [.92, .31, .9, .38], [.06, .40, 1, .4], [.24, .45, .9, .34], [.78, .43, 1, .42], [.50, .50, .9, .3], [.16, .58, .9, .32], [.88, .56, 1, .36]]
-        .forEach(([x, y, r, a], i) => { ctx.fillStyle = col('FFE8ECF8', a * sv * (.68 + .32 * (i % 2 ? tB : tA))); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); });
-      starGlow(ctx, .19 * w, .13 * h, 1.2, 'FFEFF2FA', (.5 + .45 * tB) * sv); starGlow(ctx, .83 * w, .18 * h, 1, 'FFE6EAF6', (.45 + .45 * tA) * sv);
+        .forEach(([x, y, r, a], i) => { ctx.fillStyle = col('FFE8ECF8', a * stars * (.68 + .32 * (i % 2 ? tB : tA))); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); });
+      starGlow(ctx, .19 * w, .13 * h, 1.2, 'FFEFF2FA', (.5 + .45 * tB) * stars); starGlow(ctx, .83 * w, .18 * h, 1, 'FFE6EAF6', (.45 + .45 * tA) * stars);
+      starGlow(ctx, sx - 2.9 * sunR, sy + 1.7 * sunR, 1.7, 'FFFFF4E2', .95 * stars); // Venus
     }
     if (hor > .004) {
       ctx.fillStyle = vstops(ctx, 0, h, [[0, '00FF9A6E'], [.7, '00FF9A6E'], [.88, 'FFE8875E', .07 * hor], [1, 'FFFFB07E', .17 * hor]]); ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FFB98A78', .05 * hor], [.16, '00B98A78'], [1, '00B98A78']]); ctx.fillRect(0, 0, w, h);
     }
+    // the corona, arriving with the beads: a faint drawn glow, the photograph, and only the outermost drawn streamers
     if (cor > .004) {
       const b = cor * (.94 + .12 * swell), L = 1 / 2.7;
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.arc(sx, sy, sunR, 0, TAU, true); ctx.clip('evenodd');
-      appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.08, withA('E7EFFB', .42 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.32, withA('E2EAF8', .16 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.72, withA('DAE3F4', .048 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [L * 2.25, withA('D6E0F2', .008 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
-      drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, b);
-      appBlob(ctx, sx, sy, sunR * 1.16, 1, 1, [[0, '00F8FAFE'], [.845, '00F8FAFE'], [.875, withA('F8FAFE', .55 * b)], [.915, withA('EAF0FC', .24 * b)], [.96, withA('DCE6F8', .07 * b)], [1, '00DCE6F8']]);
+      ctx.globalAlpha = .22;
+      appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
+      ctx.globalAlpha = 1;
+      photoCorona(ctx, CORONA_IMG.sky, sx, sy, sunR, swell, turn * .5, .8 * b);
+      drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, .3 * b);
       ctx.restore();
     }
-    if (alive > .004 && day > .004) { const a = (.30 + .42 * hot) * alive; appBlob(ctx, sx - .92 * hot * sunR, sy, sunR * (1.75 - .85 * hot), 1, 1, [[0, withA('FFFBF0', a)], [.5, withA('FFEFCE', a * .35)], [1, '00FFEFCE']]); }
-    const sunUp = crescent > 0;
-    if (sunUp && day > .004) { const gr = sunR + 34 * u * (.9 + .1 * breathe(t, 11000)); appBlob(ctx, sx, sy, gr, 1, 1, [[0, withA('FFF0CE', .5 * day)], [sunR / gr, withA('FFF0CE', .5 * day)], [1, '00FFF0CE']]); }
-    if (sunUp) {
-      ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = appGrad(ctx, sx - 5.2 * u, sy - 10.4 * u, sunR, [[0, 'FFFFFFFF'], [.34, 'FFFFFFFA'], [.62, 'FFFFF6DC'], [.84, 'FFFFE6B2'], [1, 'FFFCD190']]); ctx.fillRect(sx - sunR, sy - sunR, sunR * 2, sunR * 2); ctx.restore();
-      if (hot > .004) { ctx.fillStyle = col('FFFFFFFF', .85 * hot); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.fill(); }
+    // the sun: limb-darkened, white at the centre, warmer and dimmer towards the edge; glare shrinking with the crescent
+    if (light > 0 || dx > 2 * u) {
+      ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip();
+      ctx.fillStyle = appGrad(ctx, sx, sy, sunR, [[0, 'FFFFFFFF'], [.55, 'FFFFFEF6'], [.8, 'FFFFF3D6'], [.94, 'FFFFE2AE'], [1, 'FFF6C886']]); ctx.fillRect(sx - sunR, sy - sunR, 2 * sunR, 2 * sunR);
+      ctx.restore();
+      const gr = sunR + 34 * u * (.25 + .75 * vis ** .5) * (.9 + .1 * breathe(t, 11000)), ga = .5 * day * (.4 + .6 * vis ** .4);
+      if (day > .004) appBlob(ctx, sx, sy, gr, 1, 1, [[0, withA('FFF0CE', ga)], [sunR / gr, withA('FFF0CE', ga)], [1, '00FFF0CE']]);
     }
-    const chromo = ramp(.702, .710) * (.42 - .29 * ramp(.712, .78));
-    if (chromo > .002) {
-      const a = chromo * (.9 + .1 * breathe(t, 9000)); ctx.strokeStyle = col('FFFFC0A4', a * .75); ctx.lineWidth = 1.1 * u; ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.stroke();
-      for (const [ang, size, k] of [[118, .085, 1], [196, .055, .7], [302, .07, .9], [58, .04, .55]]) { const rr = ang * Math.PI / 180; appBlob(ctx, sx + Math.cos(rr) * sunR * 1.01, sy + Math.sin(rr) * sunR * 1.01, size * sunR, 1, 1, [[0, withA('FF9A86', a * 1.6 * k)], [.5, withA('FF7A6E', a * .7 * k)], [1, '00FF7A6E']]); }
+    // the moon, with its mountains; a faintly lit body (earthshine) rather than a hole
+    ctx.save();
+    if (cor < .02) { ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); }
+    ctx.beginPath();
+    for (let i = 0; i <= 360; i++) { const f = i / 360 * TAU, r = moonR + amp * MOON_EDGE(f); i ? ctx.lineTo(mx + Math.cos(f) * r, sy + Math.sin(f) * r) : ctx.moveTo(mx + Math.cos(f) * r, sy + Math.sin(f) * r); }
+    ctx.fillStyle = appGrad(ctx, mx - .25 * moonR, sy - .3 * moonR, moonR * 1.25, [[0, 'FF0E1019'], [.55, 'FF090B12'], [1, 'FF05050C']]); ctx.fill();
+    ctx.restore();
+    // Baily's beads: sunlight through the valleys, each a soft point that flickers as it narrows
+    if (T > 16.5 && light > 0) for (const [px, py, g] of beads) {
+      const k = clamp(g / (2.2 * u), 0, 1), fl = .8 + .2 * Math.sin(t * 9 + px * .7 / u);
+      appBlob(ctx, px, py, (2.5 + 5 * k) * u, 1, 1, [[0, withA('FFFDF4', .32 * k * fl)], [1, '00FFFDF4']]);
     }
-    ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = '#05050C'; ctx.beginPath(); ctx.arc(sx + moonDx, sy, moonR, 0, TAU); ctx.fill(); ctx.restore();
-    for (const [bx, by, size, st, en, ph] of [[-56, 33, 3, .692, .702, 0], [-61, 22, 5.5, .693, .706, 1.7], [-64, 11, 3.5, .695, .709, 3.1], [-65, 0, 7, .694, .7155, .8], [-63.5, -13.5, 4.5, .696, .7075, 2.4], [-59.5, -26, 3, .692, .700, 4.2]]) {
-      const tt = (q - st) / (en - st); if (tt <= 0 || tt >= 1) continue;
-      const a = clamp(Math.min(1, tt / .18) * Math.min(1, (1 - tt) / .28) * (.72 + .28 * Math.sin(q * 1600 + ph)), 0, 1); if (a <= .01) continue;
-      const x = sx + bx * u, y = sy + by * u, r = size * u / 2; appBlob(ctx, x, y, r * 4.5, 1, 1, [[0, withA('FFFDF4', .55 * a)], [1, '00FFFDF4']]); ctx.fillStyle = col('FFFFFFFC', a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
-    }
-    const rt = (q - .704) / .021;
-    if (rt > 0 && rt < 1) {
-      const sc = rt < .52 ? .3 + 1.15 * (rt / .52) : 1.45 - .95 * ((rt - .52) / .48), a = Math.sin(Math.PI * rt) ** .8, cx = sx - 60 * u, cy = sy;
-      ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy);
-      appBlob(ctx, cx, cy, 96 * u, 1, 128 / 192, [[0, withA('FFFDF2', .42 * a)], [.5, withA('FFF2D8', .14 * a)], [1, '00FFF2D8']]);
-      for (const [len, th, k, ang] of [[208, 3, 1, 0], [124, 3, .72, 90], [76, 2, .42, 45], [76, 2, .42, -45]]) {
-        const aa = a * k; if (aa <= .01) continue; ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang * Math.PI / 180); ctx.translate(-cx, -cy);
-        for (const [tk, mul] of [[th * 3.2 * u, .3], [th * u, 1]]) { const g = ctx.createLinearGradient(cx - len * u / 2, 0, cx + len * u / 2, 0); g.addColorStop(0, col('00FFF6DE')); g.addColorStop(.5, col('FFFFFDF4', aa * mul)); g.addColorStop(1, col('00FFF6DE')); ctx.fillStyle = g; ctx.fillRect(cx - len * u / 2, cy - tk / 2, len * u, tk); }
-        ctx.restore();
-      }
-      appBlob(ctx, cx, cy, 19 * u, 1, 1, [[0, withA('FFFFFF', .9 * a)], [.5, withA('FFF6DE', .3 * a)], [1, '00FFF6DE']]);
-      ctx.fillStyle = col('FFFFFFFF', a); ctx.beginPath(); ctx.arc(cx, cy, 5 * u, 0, TAU); ctx.fill(); ctx.restore();
-    }
+    // the diamond ring: as the light dwindles to the last bead it blazes, going out with it
+    const dia = light > 0 ? clamp(1 - light / (70 * u), 0, 1) * ramp(16.5, 18) : 0;
+    if (dia > .01) diamond(ctx, lx / light, ly / light, dia * Math.min(1, light / (6 * u)) ** .35, u, 38 + 34 * dia);
+    // the chromosphere: a thin pink arc where the last light went out, for a few seconds; prominences stay, faintly
+    const flash = ramp(20.4, 20.9) * (1 - ramp(21.6, 23.5));
+    if (flash > .004) { ctx.strokeStyle = col('FFFF9E8C', .75 * flash); ctx.lineWidth = 1.6 * u; ctx.beginPath(); ctx.arc(sx, sy, sunR + .6 * u, Math.PI - .75, Math.PI + .75); ctx.stroke(); }
+    const prom = ramp(20.5, 21.2) * (1 - .62 * ramp(22, 26));
+    for (const [ang, size, k] of PROMINENCES) prominence(ctx, sx, sy, sunR, ang, size, .9 * prom * k);
   },
 };
 let siteTheme = 'ocean', lockT0 = 0, lockTotal = 1;
@@ -1076,7 +1115,12 @@ function paintOrb(now) {
   if (p > 0) { cx.globalAlpha = p; cx.drawImage(offB, o, o); }
   cx.globalAlpha = 1; cx.setTransform(s, 0, 0, s, 0, 0);
   const orbR = orbD / 2 * br;
-  if (bloom > .001 && bloom < 1) {
+  if (bloom > .001 && bloom < 1 && spec.day.corona) {
+    // Eclipse: the last point of sunlight blazing on the rim, a thin ring of light round the limb
+    const k = Math.sin(Math.PI * clamp(bloom * 1.25, 0, 1)) ** .7, r = -130 * Math.PI / 180;
+    cx.strokeStyle = `rgba(248,250,254,${.55 * k})`; cx.lineWidth = 1.6; cx.beginPath(); cx.arc(C0, C0, orbR + .5, 0, TAU); cx.stroke();
+    diamond(cx, C0 + Math.cos(r) * orbR, C0 + Math.sin(r) * orbR, k, 1);
+  } else if (bloom > .001 && bloom < 1) {
     const R = orbR * (.86 + bloom * .69), a = .85 * (1 - bloom), g = cx.createRadialGradient(C0, C0, 0, C0, C0, R);
     g.addColorStop(0, rgba(ACC, a)); g.addColorStop(.5, rgba(ACC, a * .4)); g.addColorStop(1, rgba(ACC, 0)); cx.fillStyle = g; cx.beginPath(); cx.arc(C0, C0, R, 0, 7); cx.fill();
   }
@@ -1254,7 +1298,7 @@ let themeIdx = 1, userPicked = false, themesVisible = false;
 const themeCanvas = $('#themeSky'), themeSky = runner(themeCanvas, (ctx, w, h, t) => SKY[THEMES[themeIdx].id](ctx, w, h, t));
 const tabs = $('#tabs'), tName = $('#themeName'), tLine = $('#themeLine'), root = document.documentElement;
 const tScr = $('#tScr'), tLock = $('#tLock'); let tShown = performance.now();
-const tPhone = runner(tLock, (ctx, w, h, t) => { const id = THEMES[themeIdx].id; LOCKS[id](ctx, w, h, t, .15, .62 + (performance.now() - tShown) / 30000); ctx.setTransform(1, 0, 0, 1, 0, 0); });
+const tPhone = runner(tLock, (ctx, w, h, t) => { const id = THEMES[themeIdx].id; LOCKS[id](ctx, w, h, t, .15, .5 + (performance.now() - tShown) / 30000); ctx.setTransform(1, 0, 0, 1, 0, 0); });
 new ResizeObserver(() => tScr.style.setProperty('--k', tScr.clientWidth / 400)).observe(tScr);
 const tClock = () => { $('#tTop').textContent = `Full Lock · 45 minutes · ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`; }; tClock(); setInterval(tClock, 30000);
 THEMES.forEach((th, i) => { const b = document.createElement('button'); b.className = 'tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === themeIdx); b.innerHTML = `<i style="background:${th.dot}"></i>${th.name}`; b.onclick = () => pickTheme(i); tabs.appendChild(b); });

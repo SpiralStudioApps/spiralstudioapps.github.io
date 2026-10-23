@@ -154,15 +154,32 @@ body.is-night .endbtn{display:inline-block}
 .lockscr{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity 1.3s var(--ease)}
 .lockscr canvas{position:absolute;inset:0;width:100%;height:100%}
 body.is-night .lockscr{opacity:1;pointer-events:auto}
-.lk .top{position:absolute;top:64px;left:24px;right:24px;text-align:center;font-size:12.5px;letter-spacing:.2px;line-height:17px;color:rgba(238,243,245,.55)}
-.lk .count{position:absolute;top:385px;left:0;right:0;display:flex;flex-direction:column;align-items:center}
+/* Full Lock = the system overlay (LockOverlayView.kt); Selective = the Compose LockScreen.kt.
+   Both are vertical stacks with weighted spacers, so .lk is a flex column. */
+.lk{display:flex;flex-direction:column;align-items:center;color:#EEF3F5}
+.lk .sp{flex:1 1 0}
+.lk .top{width:100%;padding:48px 0 0;text-align:center;font-size:12.5px;letter-spacing:.016em;line-height:1.172;color:rgba(238,243,245,.55)}
 .lk .row{display:flex;align-items:flex-start;justify-content:center}
 .lk .col{display:flex;flex-direction:column;align-items:center}
-.lk .n{font-family:var(--serif);font-size:78px;line-height:78px;color:#EEF3F5}
-.lk .l{margin-top:12px;font-size:10px;font-weight:500;letter-spacing:3px;padding-left:3px;line-height:14px;color:rgba(238,243,245,.55)}
-.lk .dotsep{font-family:var(--serif);font-size:30px;line-height:30px;padding:24px 16px;color:rgba(238,243,245,.28)}
-.lk .rem{margin-top:14px;font-size:13px;letter-spacing:.3px;line-height:18px;color:rgba(238,243,245,.45)}
-.lk .em{position:absolute;top:822px;left:0;right:0;text-align:center;font-size:15px;line-height:20px;color:rgba(238,243,245,.55)}
+.lk .n{font-family:var(--serif);font-size:78px;line-height:104px}
+.lk .l{margin-top:6px;font-size:10px;font-weight:500;letter-spacing:.3em;padding-left:.3em;line-height:1.172;color:rgba(238,243,245,.55)}
+.lk .dotsep{font-family:var(--serif);font-size:30px;line-height:40px;padding:22px 14px 0;color:rgba(238,243,245,.28)}
+.lk .rem{padding-top:14px;font-size:13px;letter-spacing:.02em;line-height:1.172;color:rgba(238,243,245,.45);text-align:center}
+.lk .quote{padding:0 40px 32px;text-align:center;opacity:0;transition:opacity 2s ease-in-out}
+.lk .quote.on{opacity:1;transition:opacity 1.8s ease-in-out 1.2s}
+.lk .homebar{display:none} /* both lock surfaces hide the system bars */
+.lk .quote p{font-family:var(--serif);font-style:italic;font-size:15px;line-height:24px;letter-spacing:.013em;color:rgba(238,243,245,.55)}
+.lk .quote small{display:block;margin-top:10px;font-size:9.5px;font-weight:500;letter-spacing:.26em;padding-left:.26em;line-height:1.172;color:rgba(238,243,245,.4)}
+.lk .em{padding:10px 24px;margin-bottom:40px;font-size:13px;letter-spacing:.023em;line-height:1.172;color:rgba(236,242,238,.5)}
+.lk .tail{display:none;height:64px}
+/* Selective: the Compose lock screen's spacing */
+.lk.sel .top{padding:64px 24px 0;letter-spacing:.2px;line-height:16px}
+.lk.sel .n{line-height:78px}
+.lk.sel .l{margin-top:12px;letter-spacing:3px;padding-left:3px;line-height:16px}
+.lk.sel .dotsep{line-height:30px;padding:24px 16px}
+.lk.sel .rem{padding-top:14px;letter-spacing:.3px;line-height:16px}
+.lk.sel .quote,.lk.sel .em{display:none}
+.lk.sel .tail{display:block}
 
 /* ── marquee ── */
 .marquee{border-block:1px solid var(--line);overflow:hidden;padding:24px 0;white-space:nowrap}
@@ -350,10 +367,14 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
           </div>
           <div class="lockscr" id="lockscr" aria-live="polite">
             <canvas id="lockSky" aria-hidden="true"></canvas>
-            <div class="lk">
+            <div class="lk" id="lk">
               <div class="top" id="lTop">Full Lock · 45 minutes · 2:54 AM</div>
+              <div class="sp"></div>
               <div class="count"><div class="row" id="lRow"></div><div class="rem">remaining</div></div>
+              <div class="sp"></div>
+              <div class="quote" id="lQuote"><p id="lQt"></p><small id="lQa"></small></div>
               <div class="em">Emergency</div>
+              <div class="tail"></div>
               <div class="homebar"></div>
             </div>
           </div>
@@ -621,7 +642,27 @@ const heroSky = runner($('#heroSky'), (ctx, w, h, t) => {
   SKY.ocean(ctx, w, h, t);
   if (night > .002) { ctx.fillStyle = `rgba(3,6,10,${.66 * night})`; ctx.fillRect(0, 0, w, h); stars(ctx, w, h, t + 3, { maxY: .8, alpha: .8 * night }); }
 });
-const lockSky = runner($('#lockSky'), (ctx, w, h, t) => { if (document.body.classList.contains('is-night')) SKY.ocean(ctx, w, h, t); });
+// The app's Ocean lock atmosphere (OceanBackground.kt): a deep vertical gradient, a skylight sheen
+// breathing at the top (15 s) and five swell crests breathing on 17–27 s periods. Drawn in dp.
+const bez = (x, x1 = .42, x2 = .58) => { let a = 0, b = 1; for (let k = 0; k < 24; k++) { const m = (a + b) / 2, bx = 3 * (1 - m) ** 2 * m * x1 + 3 * (1 - m) * m * m * x2 + m ** 3; if (bx < x) a = m; else b = m; } const u = (a + b) / 2; return 3 * (1 - u) * u * u + u ** 3; };
+const breathe = (t, ms) => { const u = (t * 1000 / ms) % 2; return bez(u < 1 ? u : 2 - u); };
+function oceanLock(ctx, W, H, t) {
+  const s = W / 400, w = 400, h = H / s; ctx.setTransform(s, 0, 0, s, 0, 0);
+  const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#0B1624'); bg.addColorStop(.46, '#0A1A2C'); bg.addColorStop(1, '#071120');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+  const blob = (x, y, r, sx, sy, col, stops) => {
+    ctx.save(); ctx.translate(x, y); ctx.scale(sx, sy); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+    stops.forEach(([p, a]) => g.addColorStop(p, `rgba(${col},${a})`)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.restore();
+  };
+  const a = .13 * (.55 + .45 * breathe(t, 15000));
+  blob(.5 * w, -.02 * h, .62 * w, 1.35, .85, '190,222,238', [[0, a], [1, 0]]);
+  for (const [y, x, ht, al, ms, tr] of [[.24, .42, 60, .10, 19000, 24], [.38, .58, 64, .07, 24000, 26], [.66, .46, 72, .12, 17000, 24], [.78, .55, 80, .16, 27000, 30], [.89, .48, 88, .20, 21000, 26]]) {
+    const r = ht * 1.5, dy = (.5 - breathe(t, ms)) * 2 * tr;
+    blob(x * w, y * h + dy, r, w * .75 / r, 1, '186,218,236', [[0, al], [.5, al * .35], [1, 0]]);
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+const lockSky = runner($('#lockSky'), (ctx, w, h, t) => { if (document.body.classList.contains('is-night')) oceanLock(ctx, w, h, t); });
 
 /* ── live app replica ────────────────────────────────────────── */
 // Mirrors the app's code: DURATION_STEPS + bands (SessionIntent.kt), RadialDial.kt,
@@ -797,8 +838,13 @@ orb.addEventListener('contextmenu', e => e.preventDefault());
 // the lock screen
 const hhmm = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 let endAt = 0, lockM = 0, tickT = 0;
+const QUOTES = [["Nowhere can man find a quieter or more untroubled retreat than in his own soul.", "Marcus Aurelius"], ["The quieter you become, the more you are able to hear.", "Rumi"], ["The primary indication of a well-ordered mind is a man’s ability to stay in one place and linger in his own company.", "Seneca"], ["How we spend our days is, of course, how we spend our lives.", "Annie Dillard"], ["In an age of distraction, nothing is so luxurious as paying attention.", "Pico Iyer"], ["To the mind that is still, the whole universe surrenders.", "Lao Tzu"], ["Silence is a source of great strength.", "Lao Tzu"], ["Small acts, repeated, become who you are.", "Will Durant"], ["In quietness and trust shall be your strength.", "Isaiah"], ["He who cannot rest, cannot work.", "Harry Emerson Fosdick"], ["All of humanity’s problems stem from man’s inability to sit quietly in a room alone.", "Blaise Pascal"], ["It is not that we have a short time to live, but that we waste a great deal of it.", "Seneca"]];
 function lock() {
   locked = true; committing = false; lockM = STEPS[idx]; endAt = Date.now() + lockM * 60000;
+  // Full Lock shows the overlay with a quote above Emergency; Selective shows the Compose lock screen
+  const q = QUOTES[Math.floor(Date.now() / 60000) % QUOTES.length];
+  $('#lQt').textContent = `“${q[0]}”`; $('#lQa').textContent = q[1].toUpperCase();
+  $('#lk').classList.toggle('sel', mode === 'sel'); $('#lQuote').classList.add('on');
   updateCount(); tickT = setInterval(updateCount, 1000);
   document.body.classList.add('is-night'); nightTarget = 1; lockSky.repaint(); if (REDUCE) heroSky.repaint();
   $('#demoCap').innerHTML = "<b>Locked.</b> In the real app there's no way out until the time is up. Here, there's a button.";
@@ -809,10 +855,11 @@ function updateCount() {
   const col = (n, cap) => `<div class="col"><div class="n">${n}</div><div class="l">${cap}</div></div>`;
   const hc = col(h, h === 1 ? 'HOUR' : 'HOURS'), mc = col(m, m === 1 ? 'MINUTE' : 'MINUTES');
   $('#lRow').innerHTML = h && m ? hc + '<div class="dotsep">·</div>' + mc : h ? hc : mc;
+  if (lockM * 60000 - left >= 120000) $('#lQuote').classList.remove('on'); // the overlay's quote fades out 2 min in
   if (left <= 0) unlock();
 }
 function unlock() {
-  locked = false; committing = false; clearInterval(tickT); p = 0; bloom = 0; wake();
+  locked = false; committing = false; clearInterval(tickT); p = 0; bloom = 0; wake(); $('#lQuote').classList.remove('on');
   document.body.classList.remove('is-night'); nightTarget = 0; if (REDUCE) heroSky.repaint();
   $('#demoCap').innerHTML = '<b>This is the app.</b> Turn the dial, pick a mode, then press and hold the orb.';
 }

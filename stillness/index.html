@@ -279,14 +279,23 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .hero-grid .lead{margin:0 auto}
   .cta,.chips{justify-content:center}
   #demo{--dh:min(74svh,640px)}
-  /* phones: the section pins and scrolling down carries the four cards sideways */
-  .modes{height:calc(100svh + 3 * 75svh)}
-  .modes .pin{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:center;padding:58px 0 0;overflow:hidden}
+  /* phones: a row of four cards. Where the browser supports scroll-driven animations the section
+     pins and the scroll position itself (on the compositor, no script) carries the row sideways;
+     elsewhere it stays a row you swipe. */
+  .modes{height:auto}
+  .modes .pin{position:static;height:auto;display:block;padding:100px 0 70px}
   .modes .pin > .device{display:none}
   .modes .pin .eyebrow{text-align:center;padding:0 20px;margin-bottom:18px!important}
-  .steps{padding:0;display:flex;gap:14px;will-change:transform}
+  .steps{--W:min(82vw,380px);padding:0 calc((100vw - var(--W)) / 2) 6px;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+  .steps::-webkit-scrollbar{display:none}
   .steps::before,.steps .bar{display:none}
-  .step{flex:0 0 min(82vw,380px);padding:0;text-align:center;transition:none}
+  .step{flex:0 0 var(--W);scroll-snap-align:center;padding:0;opacity:1!important;text-align:center;transition:none}
+  @supports (animation-timeline: view()) {
+    .modes{height:400svh;view-timeline:--modes block}
+    .modes .pin{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:stretch;padding:58px 0 0;overflow:hidden}
+    .modes .pin > div{width:100%;min-width:0}
+    .steps{overflow:visible;padding:0;scroll-snap-type:none;will-change:transform;animation:stepSlide linear both;animation-timeline:--modes;animation-range:contain 0% contain 100%}
+  }
   .step h3{font-size:25px}
   .step p{max-height:none;opacity:1;margin:0 auto;font-size:15px;line-height:1.5}
   .step .device{display:block;height:min(500px,max(300px,calc(100svh - 380px)));margin:0 auto 20px}
@@ -309,6 +318,13 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .hero-grid .lead{font-size:16.5px}
   .cta{margin-top:20px}
   .chips{display:none}
+}
+/* phones: each card rests centred, then eases across to the next (one screen of scrolling per card) */
+@keyframes stepSlide {
+  0%, 10%   { transform:translate3d(calc((100vw - var(--W)) / 2), 0, 0); animation-timing-function:ease-in-out }
+  30%, 40%  { transform:translate3d(calc((100vw - var(--W)) / 2 - (var(--W) + 14px)), 0, 0); animation-timing-function:ease-in-out }
+  60%, 70%  { transform:translate3d(calc((100vw - var(--W)) / 2 - 2 * (var(--W) + 14px)), 0, 0); animation-timing-function:ease-in-out }
+  90%, 100% { transform:translate3d(calc((100vw - var(--W)) / 2 - 3 * (var(--W) + 14px)), 0, 0) }
 }
 /* steps' dots (phones only) */
 .dots{display:none}
@@ -914,7 +930,7 @@ let curStep = 0;
 const stepsRow = $('#steps'), dots = $('#stepDots');
 function setStep(i) { if (i === curStep) return; curStep = i; stageImgs.forEach((im, k) => im.classList.toggle('on', k === i)); stepEls.forEach((s, k) => s.classList.toggle('on', k === i)); [...dots.children].forEach((d, k) => d.setAttribute('aria-current', k === i)); }
 // phones: the steps are a swipeable row; the dots follow the swipe and jump to a card
-stepEls.forEach((st, k) => { const d = document.createElement('button'); d.innerHTML = '<i></i>'; d.setAttribute('aria-label', st.querySelector('.num').textContent); d.setAttribute('aria-current', k === 0); d.onclick = () => scrollTo({ top: modes.offsetTop + k / (stepEls.length - 1) * (modes.offsetHeight - innerHeight) + 1, behavior: REDUCE ? 'auto' : 'smooth' }); dots.appendChild(d); });
+stepEls.forEach((st, k) => { const d = document.createElement('button'); d.innerHTML = '<i></i>'; d.setAttribute('aria-label', st.querySelector('.num').textContent); d.setAttribute('aria-current', k === 0); d.onclick = () => SLIDE ? scrollTo({ top: modes.offsetTop + HOLD[k] * (modes.offsetHeight - innerHeight), behavior: REDUCE ? 'auto' : 'smooth' }) : stepsRow.scrollTo({ left: st.offsetLeft - (stepsRow.clientWidth - st.offsetWidth) / 2, behavior: REDUCE ? 'auto' : 'smooth' }); dots.appendChild(d); });
 
 /* ── scroll ─────────────────────────────────────────────────── */
 const nav = $('#nav'), manifesto = $('#manifesto'), mcta = $('#mcta'), heroSec = $('#hero'), finalSec = $('#final'); let lastY = scrollY, ticking = false;
@@ -933,18 +949,14 @@ function onScroll() {
     const on = stepEls[curStep]; if (on) bar.style.height = (on.offsetTop + on.offsetHeight - 6) * (.4 + .6 * ((pg * stepEls.length) % 1)) + 'px';
   } else slideSteps();
 }
-// phones: progress through the pinned section moves the row of cards; each card rests centred for a
-// moment (the first and last quarter of each leg) before the next one slides in
+// phones: the row moves on the compositor (CSS stepSlide); script only keeps the dots in step,
+// from the pinned progress or, where the row is swiped instead, from its scroll position
+const SLIDE = CSS.supports('animation-timeline: view()'), HOLD = [.05, .35, .65, .95];
 function slideSteps() {
-  const r = modes.getBoundingClientRect(), n = stepEls.length, span = r.height - innerHeight;
-  const sPos = clamp(-r.top / (span || 1), 0, 1) * (n - 1), k = Math.min(n - 2, Math.floor(sPos)), f = sPos - k;
-  const e = clamp((f - .25) / .5, 0, 1), x = k + e * e * (3 - 2 * e);
-  const c = i => stepEls[i].offsetLeft + stepEls[i].offsetWidth / 2, at = c(k) + (c(k + 1) - c(k)) * (x - k);
-  stepsRow.style.transform = `translate3d(${(stepsRow.parentElement.clientWidth / 2 - at).toFixed(1)}px,0,0)`;
-  stepEls.forEach((st, i) => st.style.opacity = 1 - .62 * Math.min(1, Math.abs(i - x)));
-  setStep(Math.round(x));
+  if (SLIDE) { const r = modes.getBoundingClientRect(), pg = clamp(-r.top / ((r.height - innerHeight) || 1), 0, 1); setStep(pg < .2 ? 0 : pg < .5 ? 1 : pg < .8 ? 2 : 3); }
+  else { const mid = stepsRow.scrollLeft + stepsRow.clientWidth / 2; let best = 0, bd = 1e9; stepEls.forEach((st, k) => { const d = Math.abs(st.offsetLeft + st.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = k; } }); setStep(best); }
 }
-addEventListener('resize', () => { if (innerWidth <= 900) slideSteps(); else { stepsRow.style.transform = ''; stepEls.forEach(st => st.style.opacity = ''); } });
+stepsRow.addEventListener('scroll', () => { if (innerWidth <= 900 && !SLIDE) slideSteps(); }, { passive: true });
 addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
 addEventListener('resize', onScroll); onScroll();
 

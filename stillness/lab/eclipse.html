@@ -28,7 +28,11 @@ figcaption b{color:var(--gold);font-weight:500}
 .lk .em{padding:10px 24px;margin-bottom:40px;font-size:13px;color:rgba(236,242,238,.5)}
 .credit{margin-top:34px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.6}
 .credit a{color:var(--muted)}
-@media (max-width:700px){.phone{--dh:min(82svh,560px)}}
+.sec{font-family:"Playfair Display",serif;font-weight:400;font-size:clamp(24px,4vw,34px);text-align:center;margin-top:64px}
+.orbs{margin-top:26px}
+.orbcard{width:min(44vw,380px);aspect-ratio:1;border-radius:28px;background:radial-gradient(120% 120% at 50% 0%,#101C26,#0C141C 55%,#0A1118);box-shadow:0 0 0 1px rgba(233,240,242,.08)}
+.orbcard canvas{width:100%;height:100%;display:block;touch-action:none;cursor:pointer;-webkit-user-select:none;user-select:none}
+@media (max-width:700px){.phone{--dh:min(82svh,560px)}.orbcard{width:min(88vw,380px)}}
 </style></head><body>
 <h1>Eclipse, now and with a real corona</h1>
 <p class="lead">Both phones play the app's 30-second arrival: the sun, the thinning crescent, Baily's beads, the diamond ring, then totality. On the right: a real photographed corona; the moon's mountainous edge breaking the last light into Baily's beads; a softer diamond ring over the first ring of corona; a pink flash at the edge and prominences that stay; a limb-darkened sun whose glare shrinks with the crescent; earthshine and Venus. The beads and ring now take about four seconds instead of one.</p>
@@ -38,11 +42,28 @@ figcaption b{color:var(--gold);font-weight:500}
   <figure><div class="phone"><div class="scr"><canvas id="a"></canvas><div class="lk"><div class="top">Full Lock · 45 minutes</div><div class="sp"></div><div class="n">45</div><div class="l">MINUTES</div><div class="rem">remaining</div><div class="sp"></div><div class="em">Emergency</div></div></div></div><figcaption>Now: drawn</figcaption></figure>
   <figure><div class="phone"><div class="scr"><canvas id="b"></canvas><div class="lk"><div class="top">Full Lock · 45 minutes</div><div class="sp"></div><div class="n">45</div><div class="l">MINUTES</div><div class="rem">remaining</div><div class="sp"></div><div class="em">Emergency</div></div></div></div><figcaption><b>Proposed:</b> real corona, new arrival</figcaption></figure>
 </div>
+<h2 class="sec">The home screen orb</h2>
+<p class="lead">Press and hold an orb, like starting a lock. Night falls over both; on the right the corona is the real one, and the moment the lock begins is the diamond ring.</p>
+<div class="pair orbs">
+  <figure><div class="orbcard"><canvas id="o1"></canvas></div><figcaption>Now</figcaption></figure>
+  <figure><div class="orbcard"><canvas id="o2"></canvas></div><figcaption><b>Proposed</b></figcaption></figure>
+</div>
 <p class="credit">Corona photograph: <a href="https://commons.wikimedia.org/wiki/File:Total_Solar_Eclipse_-_July_2,_2019_(48266572047).jpg">NASA Goddard Space Flight Center</a>, total solar eclipse of 2 July 2019, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>. Cropped, levelled and toned.</p>
 <script>
 (() => {
 const TAU = Math.PI * 2, DPR = Math.min(devicePixelRatio || 1, 2), clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const CORONA = new Image(); CORONA.src = 'corona-2019.webp'; const CORONA_LIMB = 0.4535;
+const CORONA_LIMB = 0.4535; let CORONA_A = null, CORONA_ORB = null;
+// the photo has a black sky; turn its brightness into transparency once, so it lays over anything
+const CORONA = new Image(); CORONA.onload = () => {
+  const c = document.createElement('canvas'); c.width = CORONA.naturalWidth; c.height = CORONA.naturalHeight; const x = c.getContext('2d'); x.drawImage(CORONA, 0, 0);
+  const d = x.getImageData(0, 0, c.width, c.height), px = d.data;
+  for (let i = 0; i < px.length; i += 4) { const a = Math.max(px[i], px[i + 1], px[i + 2]); if (a) { px[i] = px[i] * 255 / a; px[i + 1] = px[i + 1] * 255 / a; px[i + 2] = px[i + 2] * 255 / a; } px[i + 3] = a; }
+  x.putImageData(d, 0, 0); CORONA_A = c;
+  // the home screen's version reaches less far, so it stays clear of the dial's ticks and labels
+  const o = document.createElement('canvas'); o.width = c.width; o.height = c.height; const y = o.getContext('2d'); y.drawImage(c, 0, 0);
+  const R = c.width / 2, g = y.createRadialGradient(R, R, 0, R, R, R); g.addColorStop(0, '#000'); g.addColorStop(CORONA_LIMB * 1.08, '#000'); g.addColorStop(CORONA_LIMB * 1.45, 'rgba(0,0,0,.45)'); g.addColorStop(CORONA_LIMB * 1.75, 'rgba(0,0,0,0)');
+  y.globalCompositeOperation = 'destination-in'; y.fillStyle = g; y.fillRect(0, 0, o.width, o.height); CORONA_ORB = o;
+}; CORONA.src = 'corona-2019.webp';
 // The app's lock atmospheres (ui/lock/*Background.kt), drawn in dp on a 400-dp-wide screen.
 // Colours are the app's ARGB hex strings, 'AARRGGBB'.
 const bez = (x, x1 = .42, x2 = .58) => { let a = 0, b = 1; for (let k = 0; k < 24; k++) { const m = (a + b) / 2, bx = 3 * (1 - m) ** 2 * m * x1 + 3 * (1 - m) * m * m * x2 + m ** 3; if (bx < x) a = m; else b = m; } const u = (a + b) / 2; return 3 * (1 - u) * u * u + u ** 3; };
@@ -242,7 +263,7 @@ const MOON_EDGE = (() => {          // the moon's edge: valleys and peaks, as a 
 function eclipseReal(ctx, W, H, t, p, arrival) {
   const [w, h] = dpFrame(ctx, W, H, [[0, 'FF141628'], [.55, 'FF0E101E'], [1, 'FF090A14']]);
   const T = clamp(arrival, 0, 1.0001) * 30, ramp = (a, b) => clamp((T - a) / (b - a), 0, 1), ss = x => x * x * (3 - 2 * x);
-  const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235, moonR = 67 * u, amp = u * (.15 + .85 * (1 - clamp((T - 20.6) / 1.4, 0, 1)));
+  const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235, moonR = 67 * u, amp = u * (.15 + .85 * clamp((T - 15.6) / 1.2, 0, 1) * (1 - clamp((T - 20.6) / 1.4, 0, 1))) * clamp((T - 15) / .6, 0, 1);
   // the moon's offset: quick through the long partial phase, then crawling through the beads
   const dx = T < 17 ? 3.4 * u + 138.6 * u * (1 - T / 17) ** 2.2
            : T < 21 ? 3.4 * u - 2.9 * u * ((T - 17) / 4) : Math.max(0, .5 * u * (1 - (T - 21) / 9));
@@ -282,7 +303,7 @@ function eclipseReal(ctx, W, H, t, p, arrival) {
     ctx.globalAlpha = .22;
     appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.08, withA('E7EFFB', .42 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.32, withA('E2EAF8', .16 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.72, withA('DAE3F4', .048 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [L * 2.25, withA('D6E0F2', .008 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
     ctx.globalAlpha = 1;
-    if (CORONA.complete && CORONA.naturalWidth) { const size = 2 * sunR / CORONA_LIMB * (.985 + .03 * swell); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(b * .8, 0, 1); ctx.translate(sx, sy); ctx.rotate(turn * Math.PI / 360); ctx.drawImage(CORONA, -size / 2, -size / 2, size, size); ctx.restore(); }
+    if (CORONA_A) { const size = 2 * sunR / CORONA_LIMB * (.985 + .03 * swell); ctx.save(); ctx.globalAlpha = clamp(b * .8, 0, 1); ctx.translate(sx, sy); ctx.rotate(turn * Math.PI / 360); ctx.drawImage(CORONA_A, -size / 2, -size / 2, size, size); ctx.restore(); }
     drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, b * .3);
     ctx.restore();
   }
@@ -329,6 +350,132 @@ function eclipseReal(ctx, W, H, t, p, arrival) {
 }
 
 LOCKS.eclipseReal = eclipseReal;
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${clamp(a, 0, 1)})`;
+// The five themes' colours (ThemeColors.kt) and sky spheres, day and night (Ritual.kt).
+// Layer: [cx, cy, radius, stops, squashY], all in sphere diameters; stops are [pos, 'AARRGGBB'].
+const APP_THEMES = {
+  ocean: { accent: 'B7D7EA', light: 'DCEDF8', active: 'DEEBF4', subtitle: 'C4DCEC', numeral: 'E8F4FA',
+    day: { body: [.36, .30, .95, [[0, 'FF2C5A78'], [.48, 'FF1B4058'], [.80, 'FF0F2A40'], [1, 'FF0A1C2E']]], sheen: [.34, .24, .98, [[0, '80E2F4FE'], [.38, '1FB4D6EC'], [.62, '00B4D6EC'], [1, '00B4D6EC']]], drop: '6182B9D7', lit: '1AB2DAF2', limb: '99030A12' },
+    night: { body: [.40, .32, .95, [[0, 'FF16344C'], [.46, 'FF0E2338'], [.78, 'FF08182A'], [1, 'FF050F1C']]], sheen: [.30, .24, .90, [[0, '1AB7D7EA'], [.44, '00B7D7EA'], [1, '00B7D7EA']]], lit: '14A6C8E4', limb: 'B3030810' } },
+  dusk: { accent: 'ECA36B', light: 'F2BE8E', active: 'F2DFC9', subtitle: 'ECC4A0', numeral: 'F6E8D4',
+    day: { body: [.36, .30, .95, [[0, 'FF52426E'], [.46, 'FF3A2C58'], [.78, 'FF241F44'], [1, 'FF181534']]], event: [.50, 1.10, .88, [[0, '66F8A65E'], [.42, '33EA8E62'], [.66, '14C47068'], [.84, '00C47068'], [1, '00C47068']], .727], sheen: [.34, .26, .98, [[0, '42F0DEFF'], [.34, '12C4A8E4'], [.58, '00C4A8E4'], [1, '00C4A8E4']]], drop: '66D2845C', lit: '1FBA9CE0', limb: '8C0A081A' },
+    night: { body: [.40, .32, .95, [[0, 'FF2A2348'], [.46, 'FF1C1738'], [.78, 'FF120E28'], [1, 'FF0B0819']]], sheen: [.30, .24, .90, [[0, '1FD2C4F0'], [.44, '00D2C4F0'], [1, '00D2C4F0']]], lit: '147864AA', limb: 'B3060510' } },
+  forest: { accent: 'C2D89C', light: 'E0ECC4', active: 'E3EDD6', subtitle: 'D1E2BE', numeral: 'EAF2DC',
+    day: { body: [.36, .30, .95, [[0, 'FF35563C'], [.48, 'FF23422B'], [.80, 'FF15301C'], [1, 'FF0E2113']]], event: [.46, .96, .48, [[0, '386EA068'], [.75, '006EA068'], [1, '006EA068']], .42], sheen: [.34, .24, .98, [[0, '6BEEDC94'], [.38, '1ACEC074'], [.62, '00CEC074'], [1, '00CEC074']]], drop: '5C84B070', lit: '1AD6E8AC', limb: '8C030904' },
+    night: { body: [.40, .32, .95, [[0, 'FF16281A'], [.46, 'FF0F1D13'], [.78, 'FF0A140C'], [1, 'FF060D07']]], sheen: [.30, .24, .90, [[0, '14C8E8C8'], [.44, '00C8E8C8'], [1, '00C8E8C8']]], lit: '148CB47C', limb: 'B3030704' } },
+  aurora: { accent: 'B4A8E2', light: 'DCD4F4', active: 'E2DCF4', subtitle: 'CEC6EC', numeral: 'ECF2F8',
+    day: { body: [.36, .30, .95, [[0, 'FF28324F'], [.50, 'FF1A2240'], [.80, 'FF101630'], [1, 'FF0B1022']]], event: [.55, .44, .56, [[0, '3D988ADE'], [.66, '00988ADE'], [1, '00988ADE']], .40], sheen: [.34, .22, .98, [[0, '6680E8C2'], [.40, '1780E8C2'], [.64, '0080E8C2'], [1, '0080E8C2']]], drop: '577EC8B4', lit: '1AACC6EE', limb: '9903050E' },
+    night: { body: [.40, .32, .95, [[0, 'FF171B34'], [.46, 'FF0F1226'], [.78, 'FF0A0C1C'], [1, 'FF070812']]], sheen: [.30, .22, .90, [[0, '1480E8C2'], [.44, '0080E8C2'], [1, '0080E8C2']]], lit: '148C96C8', limb: 'B3030510' } },
+  eclipse: { accent: 'E2D0A0', light: 'F2E6C4', active: 'F0E4C2', subtitle: 'E8DAB4', numeral: 'F8F0DE',
+    day: { body: [.37, .30, .95, [[0, 'FF2A2838'], [.44, 'FF1B1A28'], [.76, 'FF100F1A'], [1, 'FF07070D']]], event: [.50, 1.08, .86, [[0, '21FACE98'], [.42, '0DD69E78'], [.76, '00D69E78'], [1, '00D69E78']], .721], sheen: [.33, .25, .98, [[0, '21E2D6F6'], [.30, '0AB4A8D2'], [.54, '00B4A8D2'], [1, '00B4A8D2']]], drop: '4DE4CEA4', lit: '14E4D8FA', limb: 'BF020206', corona: true },
+    night: { body: [.40, .32, .95, [[0, 'FF16151F'], [.46, 'FF0D0C14'], [.78, 'FF08080E'], [1, 'FF040409']]], sheen: [.30, .24, .90, [[0, '14E8DCB8'], [.44, '00E8DCB8'], [1, '00E8DCB8']]], lit: '14C6B688', limb: 'B3030304' } },
+};
+const hexRgb = h => [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+// one sky sphere into a square canvas d px wide: body, light event, sheen, limb shadow, lit inset (+ stars at night)
+function sphere(ctx, spec, d, starScale) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, d, d); ctx.save(); ctx.beginPath(); ctx.arc(d / 2, d / 2, d / 2, 0, TAU); ctx.clip();
+  for (const L of [spec.body, spec.event, spec.sheen]) if (L) { const [x, y, r, st, sq = 1] = L; appBlob(ctx, x * d, y * d, Math.max(1, r * d), 1, sq, st); }
+  appBlob(ctx, .34 * d, .28 * d, 1.12 * d, 1, 1, [[0, '00000000'], [.7, '00000000'], [1, spec.limb]]);
+  appBlob(ctx, .22 * d, .16 * d, .75 * d, 1, 1, [[0, spec.lit], [.55, '00000000'], [1, '00000000']]);
+  if (starScale) for (const [sx, sy, sr, sa] of [[.40, .34, 1.2, .9], [.62, .48, 1.0, .7], [.52, .66, 1.0, .6], [.30, .56, 1.0, .55], [.70, .30, 1.1, .7], [.44, .22, .9, .5], [.24, .44, .9, .5]]) {
+    ctx.fillStyle = `rgba(240,244,255,${sa})`; ctx.beginPath(); ctx.arc(sx * d, sy * d, sr * starScale, 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ── the home screen orb, in the Eclipse theme: as drawn now, and with the photographed corona ──
+const ECL = APP_THEMES.eclipse, ACCENT = [226, 208, 160], C0 = 180, RING = 360 * .342, LABEL_R = RING + 25;
+const BASE = 360 * 146 / 368, ORB_D = BASE * (.95 + .5 * 8 / 27), BAND_STARTS = [0, 3, 9, 14, 18, 23];
+const LABELS = [['BREATH', 1.5], ['FOCUS', 6], ['PRESENCE', 11.5], ['RETREAT', 16], ['REST', 20.5], ['SOLITUDE', 25.5]];
+function arcLabel(ctx, text, mid, active) {
+  const th = mid / 28 * TAU - Math.PI / 2, lower = th > 0 && th < Math.PI, ls = 2.47;
+  ctx.font = '500 9.5px Roboto, sans-serif'; ctx.fillStyle = active ? 'rgb(226,208,160)' : 'rgba(236,226,218,.32)';
+  ctx.shadowColor = active ? 'rgba(226,208,160,.45)' : 'transparent'; ctx.shadowBlur = active ? 5 : 0;
+  const ws = [...text].map(c => ctx.measureText(c).width + ls), total = ws.reduce((a, b) => a + b, 0) - ls, cap = 3.3;
+  const r = LABEL_R + (lower ? cap : -cap); let a = th + (lower ? 1 : -1) * total / 2 / r;
+  [...text].forEach((c, i) => {
+    const half = (ws[i] - ls) / 2; a += (lower ? -1 : 1) * half / r;
+    ctx.save(); ctx.translate(C0 + Math.cos(a) * r, C0 + Math.sin(a) * r); ctx.rotate(lower ? a - Math.PI / 2 : a + Math.PI / 2); ctx.fillText(c, -half, 0); ctx.restore();
+    a += (lower ? -1 : 1) * (half + ls) / r;
+  });
+  ctx.shadowBlur = 0;
+}
+function dial(ctx) {
+  for (let i = 0; i < 28; i++) {
+    const th = i / 28 * TAU - Math.PI / 2, start = BAND_STARTS.includes(i), len = start ? 12 : 6, on = i <= 8;
+    ctx.strokeStyle = on ? 'rgba(226,208,160,.95)' : 'rgba(42,54,69,.45)'; ctx.lineWidth = start ? 1.6 : 1; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(C0 + Math.cos(th) * RING, C0 + Math.sin(th) * RING); ctx.lineTo(C0 + Math.cos(th) * (RING + len), C0 + Math.sin(th) * (RING + len)); ctx.stroke();
+  }
+  for (const [txt, mid] of LABELS) arcLabel(ctx, txt, mid, txt === 'FOCUS');
+}
+function makeOrb(canvas, proposed) {
+  const ctx = canvas.getContext('2d'), offA = document.createElement('canvas'), offB = document.createElement('canvas'), t0 = performance.now();
+  let p = 0, holding = false, mark = 0, from = 0, committed = 0;
+  const HOLD = 900;  // Focus band
+  const inOrb = e => { const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 360 - C0, y = (e.clientY - r.top) / r.height * 360 - C0; return Math.hypot(x, y) < ORB_D * .6; };
+  canvas.addEventListener('pointerdown', e => { if (committed || !inOrb(e)) return; e.preventDefault(); try { canvas.setPointerCapture(e.pointerId); } catch (_) {} holding = true; from = p; mark = performance.now(); });
+  const up = () => { if (!holding) return; holding = false; from = p; mark = performance.now(); };
+  canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up); canvas.addEventListener('contextmenu', e => e.preventDefault());
+  function paint(now) {
+    const W = canvas.width, s = W / 360, t = (now - t0) / 1000;
+    if (holding) { p = clamp(from + (now - mark) / HOLD, 0, 1); if (p >= 1) { holding = false; committed = now; if (navigator.vibrate) try { navigator.vibrate([18, 40, 28]); } catch (_) {} } }
+    else if (!committed && p > 0) p = clamp(from * (1 - (now - mark) / 260), 0, 1);
+    if (committed && now - committed > 2600) { committed = 0; p = 0; from = 0; }   // the app would open the lock screen here
+    const bloom = committed ? clamp((now - committed) / 1300, 0, 1) : 0;
+    const br = .96 + .06 * (.5 - .5 * Math.cos(Math.PI * (now - t0) / 4000)), swell = breathe(t, 16000), turn = (t / 420 * 360) % 360;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, W); ctx.setTransform(s, 0, 0, s, 0, 0);
+    dial(ctx);
+    // halo and corona, breathing with the orb
+    ctx.save(); ctx.translate(C0, C0); ctx.scale(br, br); ctx.translate(-C0, -C0);
+    const dg = ECL.day.drop; appBlob(ctx, C0, C0 + ORB_D * .1, ORB_D * .72, 1, 1, [[0, withA(dg, argb(dg)[3] * clamp(1 - .7 * p, 0, 1))], [1, withA(dg, 0)]]);
+    const ca = clamp(1 - p, 0, 1);
+    if (!proposed) orbCorona(ctx, C0, C0, ORB_D, t, ca);
+    else if (ca > .004) {
+      ctx.save(); ctx.globalAlpha = .25 * ca; appBlob(ctx, C0, C0, ORB_D * 1.368 / 2 * (.97 + .06 * swell), 1, 1, [[0, '00FAF4E4'], [.35, '00FAF4E4'], [.39, '57FAF4E4'], [.49, '24EADCBE'], [.64, '0ADACAAA'], [.82, '00DACAAA'], [1, '00DACAAA']]); ctx.restore();
+      if (CORONA_A) { const size = ORB_D / CORONA_LIMB * (.985 + .03 * swell); ctx.save(); ctx.globalAlpha = .85 * ca; ctx.translate(C0, C0); ctx.rotate(turn * Math.PI / 360); ctx.drawImage(CORONA_ORB, -size / 2, -size / 2, size, size); ctx.restore(); }
+      for (const [ang, size, k] of [[164, .075, 1], [302, .06, .8]]) { const r = ang * Math.PI / 180, x = C0 + Math.cos(r) * ORB_D / 2 * 1.02, y = C0 + Math.sin(r) * ORB_D / 2 * 1.02; appBlob(ctx, x, y, size * ORB_D / 2, 1.3, 1, [[0, withA('FF9A86', .55 * k * ca)], [.5, withA('FF7A6E', .22 * k * ca)], [1, '00FF7A6E']], ang + 90, x, y); }
+    }
+    ctx.restore();
+    // the sphere: day fading out, night (with stars) fading in
+    const d = Math.max(2, Math.round(ORB_D * s * br)); if (offA.width !== d) { offA.width = offA.height = offB.width = offB.height = d; }
+    const day = proposed ? { ...ECL.day, body: [.37, .30, .95, [[0, 'FF232230'], [.44, 'FF171622'], [.76, 'FF0E0D17'], [1, 'FF07070D']]] } : ECL.day; // proposed: earthshine-dark, a touch deeper
+    sphere(offA.getContext('2d'), day, d, 0); sphere(offB.getContext('2d'), ECL.night, d, s * br);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); const o = W / 2 - d / 2;
+    ctx.globalAlpha = clamp(1 - .92 * p, 0, 1); ctx.drawImage(offA, o, o); if (p > 0) { ctx.globalAlpha = p; ctx.drawImage(offB, o, o); } ctx.globalAlpha = 1;
+    ctx.setTransform(s, 0, 0, s, 0, 0);
+    // numerals, gone by night
+    const na = clamp(1 - p, 0, 1);
+    if (na > .01) {
+      ctx.save(); ctx.translate(C0, C0); ctx.scale(br, br); ctx.textAlign = 'center';
+      ctx.fillStyle = `rgba(248,240,222,${na})`; ctx.font = '400 57.7px "Playfair Display", serif'; ctx.fillText('45', 0, 12);
+      ctx.fillStyle = `rgba(248,240,222,${.62 * na})`; ctx.font = '600 10px Roboto, sans-serif'; ctx.letterSpacing = '4px'; ctx.fillText('MIN', 2, 33); ctx.letterSpacing = '0px';
+      ctx.restore();
+    }
+    const orbR = ORB_D / 2 * br;
+    if (p > 0) {
+      ctx.strokeStyle = rgba(ACCENT, .22 * p); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(C0, C0, orbR + 1, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = rgba(ACCENT, .9 * p); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(C0, C0, orbR, 0, TAU); ctx.stroke();
+      if (!committed) { const arcR = BASE * 1.45 * 1.5 / 2 - 20; ctx.strokeStyle = rgba(ACCENT, .42); ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(C0, C0, arcR, -Math.PI / 2, -Math.PI / 2 + TAU * p); ctx.stroke(); }
+    }
+    if (bloom > .001 && bloom < 1) {
+      if (!proposed) { const R = orbR * (.86 + bloom * .69), a = .85 * (1 - bloom); appBlob(ctx, C0, C0, R, 1, 1, [[0, withA('E2D0A0', a)], [.5, withA('E2D0A0', a * .4)], [1, '00E2D0A0']]); }
+      else {
+        // the diamond ring: one blinding point on the rim, a soft flare, a ring of light round the limb
+        const k = Math.sin(Math.PI * clamp(bloom * 1.25, 0, 1)) ** .7, r = -130 * Math.PI / 180, x = C0 + Math.cos(r) * orbR, y = C0 + Math.sin(r) * orbR;
+        ctx.strokeStyle = `rgba(248,250,254,${.55 * k})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(C0, C0, orbR + .5, 0, TAU); ctx.stroke();
+        appBlob(ctx, x, y, 34 + 40 * k, 1, 1, [[0, withA('FFFDF2', .7 * k)], [.18, withA('FFF6E0', .32 * k)], [.5, withA('FFF0D8', .08 * k)], [1, '00FFF0D8']]);
+        appBlob(ctx, x, y, 8, 1, 1, [[0, withA('FFFFFF', k)], [.5, withA('FFFFFF', .6 * k)], [1, '00FFFFFF']]);
+        for (const [ang, len] of [[8, 60], [98, 40], [53, 26], [-37, 26]]) { const rr = ang * Math.PI / 180, ex = Math.cos(rr) * len, ey = Math.sin(rr) * len, g = ctx.createLinearGradient(x - ex, y - ey, x + ex, y + ey); g.addColorStop(0, 'rgba(255,246,222,0)'); g.addColorStop(.5, `rgba(255,253,244,${.25 * k})`); g.addColorStop(1, 'rgba(255,246,222,0)'); ctx.strokeStyle = g; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x - ex, y - ey); ctx.lineTo(x + ex, y + ey); ctx.stroke(); }
+      }
+    }
+  }
+  return paint;
+}
+
+const orbPaint = [['o1', false], ['o2', true]].map(([id, pr]) => { const c = document.getElementById(id); return { c, paint: makeOrb(c, pr) }; });
+function sizeOrbs() { for (const o of orbPaint) { const r = o.c.getBoundingClientRect(); o.c.width = o.c.height = Math.round(r.width * DPR); } }
+new ResizeObserver(sizeOrbs).observe(document.body); sizeOrbs();
+(function orbLoop(now) { for (const o of orbPaint) o.paint(now); requestAnimationFrame(orbLoop); })(performance.now());
 let start = performance.now(), paused = false, pausedAt = 0;
 const els = [['a', 'eclipse'], ['b', 'eclipseReal']].map(([id, fn]) => { const c = document.getElementById(id); return { c, ctx: c.getContext('2d'), fn, scr: c.parentElement }; });
 function size() { for (const e of els) { const r = e.scr.getBoundingClientRect(); e.c.width = Math.round(r.width * DPR); e.c.height = Math.round(r.height * DPR); e.scr.style.setProperty('--k', r.width / 400); } }

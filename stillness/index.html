@@ -70,8 +70,9 @@ nav.hide{transform:translateY(-100%)}
 nav .links{display:flex;align-items:center;gap:28px;font-size:14px}
 nav .links a{text-decoration:none;color:var(--muted);transition:color .3s}
 nav .links a:hover{color:var(--text)}
-nav .pill{color:var(--text)!important;border:1px solid var(--line);border-radius:999px;padding:8px 16px;transition:border-color .3s}
-nav .pill:hover{border-color:var(--accent)}
+/* filled with the Eclipse theme's gold so the one call to action stands out */
+nav .pill{color:#14110A!important;background:#E2D0A0;border:1px solid #E2D0A0;border-radius:999px;padding:8px 16px;font-weight:500;box-shadow:0 0 0 rgba(226,208,160,0);transition:background .3s,border-color .3s,box-shadow .3s}
+nav .pill:hover,nav .pill:focus-visible{background:#F2E6C4;border-color:#F2E6C4;box-shadow:0 0 22px rgba(226,208,160,.35)}
 
 /* ── phone frame (shared) ── */
 .device{position:relative;aspect-ratio:9/20;border-radius:12.5%/5.6%;padding:2.2%;

@@ -35,14 +35,17 @@
 <style>
 @property --accent { syntax: '<color>'; inherits: true; initial-value: #b7d7ea; }
 @property --accent-light { syntax: '<color>'; inherits: true; initial-value: #dcedf8; }
+@property --cta { syntax: '<color>'; inherits: true; initial-value: #e2d0a0; }
+@property --cta-light { syntax: '<color>'; inherits: true; initial-value: #f2e6c4; }
 :root{
   --bg:#070b11; --card:rgba(255,255,255,.035); --line:rgba(233,240,242,.09);
   --text:#e9f0f2; --muted:rgba(233,240,242,.55); --faint:rgba(233,240,242,.3);
   --accent:#b7d7ea; --accent-light:#dcedf8;
+  --cta:#e2d0a0; --cta-light:#f2e6c4; /* buttons: Eclipse gold until a visitor picks a theme */
   --serif:"Playfair Display", Georgia, "Times New Roman", serif;
   --sans:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --ease:cubic-bezier(.22,.61,.36,1);
-  transition: --accent 1.2s var(--ease), --accent-light 1.2s var(--ease);
+  transition: --accent 1.2s var(--ease), --accent-light 1.2s var(--ease), --cta 1.2s var(--ease), --cta-light 1.2s var(--ease);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{overflow-x:hidden}
@@ -71,8 +74,8 @@ nav .links{display:flex;align-items:center;gap:28px;font-size:14px}
 nav .links a{text-decoration:none;color:var(--muted);transition:color .3s}
 nav .links a:hover{color:var(--text)}
 /* filled with the Eclipse theme's gold so the one call to action stands out */
-nav .pill{color:#14110A!important;background:#E2D0A0;border:1px solid #E2D0A0;border-radius:999px;padding:8px 16px;font-weight:500;box-shadow:0 0 0 rgba(226,208,160,0);transition:background .3s,border-color .3s,box-shadow .3s}
-nav .pill:hover,nav .pill:focus-visible{background:#F2E6C4;border-color:#F2E6C4;box-shadow:0 0 22px rgba(226,208,160,.35)}
+nav .pill{color:#14110A!important;background:var(--cta);border:1px solid var(--cta);border-radius:999px;padding:8px 16px;font-weight:500;box-shadow:0 0 0 rgba(226,208,160,0);transition:background .3s,border-color .3s,box-shadow .3s}
+nav .pill:hover,nav .pill:focus-visible{background:var(--cta-light);border-color:var(--cta-light);box-shadow:0 0 22px color-mix(in srgb,var(--cta) 40%,transparent)}
 
 /* ── phone frame (shared) ── */
 .device{position:relative;aspect-ratio:9/20;border-radius:12.5%/5.6%;padding:2.2%;
@@ -106,8 +109,17 @@ body.is-night .endbtn{display:inline-block}
    Built at the phone's real size (400 × 889 dp) straight from the app's
    Compose code (HomeScreen, RadialDial, BreathingOrb, LockScreen), then
    scaled to the frame, so every px below is a dp/sp value from the app. */
-#demo{--dh:min(78vh,720px);height:var(--dh);width:calc(var(--dh) * .4611);aspect-ratio:auto;padding:calc(var(--dh) * .01014)}
-#demo .scr{background:#0A1118;user-select:none;-webkit-user-select:none}
+#demo{--dh:min(78vh,720px);height:var(--dh);width:calc(var(--dh) * .4611);aspect-ratio:auto;padding:calc(var(--dh) * .01014);
+  transform:perspective(1600px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform 1.1s var(--ease)}
+/* first arrival: the phone settles into place like it's being set down, then its screen wakes */
+#demo.arrive{animation:arrive 2.3s cubic-bezier(.3,.85,.3,1) .2s both}
+@keyframes arrive{from{opacity:0;transform:perspective(1600px) translate3d(0,-36px,0) rotateX(26deg) rotateY(-18deg) rotateZ(2deg) scale(.9)}to{opacity:1;transform:perspective(1600px) rotateX(0deg) rotateY(0deg)}}
+#demo .wake{position:absolute;inset:0;z-index:5;background:#04070b;pointer-events:none;opacity:0}
+#demo.arrive .wake{animation:wake 1.1s ease 1.15s both}
+@keyframes wake{from{opacity:1}to{opacity:0}}
+#orbCv,#oNm{transition:opacity .9s ease}
+.scr.waking #orbCv,.scr.waking #oNm{opacity:0!important}
+#demo .scr{--a:#B7D7EA;--a-rgb:183,215,234;--at:#DEEBF4;--st-rgb:196,220,236;--num:#E8F4FA;--num-rgb:232,244,250;background:#0A1118;user-select:none;-webkit-user-select:none}
 .app,.lk{position:absolute;left:0;top:0;width:400px;height:889px;transform-origin:0 0;transform:scale(var(--k,1));font-family:Roboto,var(--sans);color:#E9F0F2;-webkit-font-smoothing:antialiased}
 /* ritualCanvas: radial from top-centre, radius hypot(.7w, h) = 932 */
 .app{background:radial-gradient(932px circle at 50% 0,#101C26 0,#0C141C 513px,#0A1118 932px)}
@@ -123,32 +135,32 @@ body.is-night .endbtn{display:inline-block}
 .app .week span.held{color:#D6E2ED}
 .app .week span.today{color:#fff}
 .app .week span.today::after{content:"";position:absolute;left:0;right:0;top:21.5px;height:1px;background:#C9D9E7}
-.app .title{position:absolute;top:143.6px;left:0;right:0;text-align:center;font-family:var(--serif);font-size:32px;font-weight:500;line-height:38px;color:#DEEBF4}
-.app .sub{position:absolute;top:186px;left:0;right:0;text-align:center;font-family:var(--serif);font-style:italic;font-size:13.5px;line-height:20px;color:rgba(196,220,236,.6)}
+.app .title{position:absolute;top:143.6px;left:0;right:0;text-align:center;font-family:var(--serif);font-size:32px;font-weight:500;line-height:38px;color:var(--at)}
+.app .sub{position:absolute;top:186px;left:0;right:0;text-align:center;font-family:var(--serif);font-style:italic;font-size:13.5px;line-height:20px;color:rgba(var(--st-rgb),.6)}
 .app .cap{position:absolute;top:221px;left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:3px;border:1px solid rgba(233,240,242,.13);border-radius:999px}
 .app .cap button{display:flex;align-items:center;border:0;border-radius:999px;background:transparent;padding:6px 16px;font-family:var(--serif);font-size:14.5px;line-height:17px;color:rgba(233,240,242,.38);cursor:pointer;white-space:nowrap;transition:background .18s,color .18s;-webkit-tap-highlight-color:transparent}
-.app .cap button.on{background:rgba(183,215,234,.13);color:#DEEBF4}
-.app .cap button .dot{display:none;width:11px;height:11px;margin-right:4px;border-radius:50%;background:radial-gradient(circle,#B7D7EA 0 2.5px,rgba(183,215,234,.55) 2.5px,rgba(183,215,234,0) 5.5px)}
+.app .cap button.on{background:rgba(var(--a-rgb),.13);color:var(--at)}
+.app .cap button .dot{display:none;width:11px;height:11px;margin-right:4px;border-radius:50%;background:radial-gradient(circle,var(--a) 0 2.5px,rgba(var(--a-rgb),.55) 2.5px,rgba(var(--a-rgb),0) 5.5px)}
 .app .cap button.on .dot{display:block}
 .app .helper{position:absolute;top:266px;left:0;right:0;height:18px;display:flex;justify-content:center;align-items:center;font-size:11.5px;letter-spacing:.1px;color:rgba(233,240,242,.45);cursor:pointer}
-.app .helper b{color:#B7D7EA;font-weight:500}
-.app .helper em{font-style:normal;color:rgba(183,215,234,.72);white-space:pre}
-.app .helper svg{width:15px;height:15px;margin-left:2px;fill:none;stroke:#B7D7EA;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.app .helper b{color:var(--a);font-weight:500}
+.app .helper em{font-style:normal;color:rgba(var(--a-rgb),.72);white-space:pre}
+.app .helper svg{width:15px;height:15px;margin-left:2px;fill:none;stroke:var(--a);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .app .dial{position:absolute;left:20px;top:345.5px;width:360px;height:360px;touch-action:pan-y;cursor:grab;outline:none}
 .app .dial:active{cursor:grabbing}
 .app .dial svg,.app .dial canvas{position:absolute;inset:0;width:360px;height:360px;overflow:visible;pointer-events:none}
 .app .dial text{font-family:Roboto,var(--sans);font-size:9.5px;font-weight:500;letter-spacing:.26em;fill:rgba(236,226,218,.32)}
-.app .dial text.on{fill:#B7D7EA;filter:drop-shadow(0 0 3.4px rgba(183,215,234,.45))}
-.app .dial:focus-visible{outline:1px dashed rgba(183,215,234,.4);outline-offset:-30px;border-radius:50%}
+.app .dial text.on{fill:var(--a);filter:drop-shadow(0 0 3.4px rgba(var(--a-rgb),.45))}
+.app .dial:focus-visible{outline:1px dashed rgba(var(--a-rgb),.4);outline-offset:-30px;border-radius:50%}
 .orb2{position:absolute;left:50%;top:50%;width:160px;height:160px;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;cursor:pointer;touch-action:pan-y;-webkit-tap-highlight-color:transparent;outline:none;padding:0}
 .orb2 .nm{position:absolute;left:50%;top:50%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%) scale(var(--b,1));pointer-events:none}
-.orb2 .num{position:relative;top:8px;font-family:var(--serif);font-weight:400;color:#E8F4FA;white-space:nowrap}
-.orb2 .unit{margin-top:20px;font-family:Roboto,var(--sans);font-size:10px;letter-spacing:4px;font-weight:600;color:rgba(232,244,250,.62);padding-left:4px;line-height:14px}
+.orb2 .num{position:relative;top:8px;font-family:var(--serif);font-weight:400;color:var(--num);white-space:nowrap}
+.orb2 .unit{margin-top:20px;font-family:Roboto,var(--sans);font-size:10px;letter-spacing:4px;font-weight:600;color:rgba(var(--num-rgb),.62);padding-left:4px;line-height:14px}
 .app .whisper{position:absolute;top:707px;left:0;right:0;height:18px;line-height:18px;text-align:center;font-size:10.5px;letter-spacing:1.5px;color:rgba(222,232,234,.35);transition:opacity .4s}
 .app .tabs{position:absolute;left:0;right:0;top:824px;display:flex}
 .app .tabs span{flex:1;display:flex;flex-direction:column;align-items:center;font-family:var(--serif);font-size:17px;letter-spacing:.1px;line-height:23px;color:rgba(226,236,238,.35)}
-.app .tabs span i{display:block;width:0;height:2px;margin-top:5px;background:#B7D7EA}
-.app .tabs span.on{color:#DEEBF4}
+.app .tabs span i{display:block;width:0;height:2px;margin-top:5px;background:var(--a)}
+.app .tabs span.on{color:var(--at)}
 .app .tabs span.on i{width:22px}
 .app .homebar,.lk .homebar{position:absolute;top:880.5px;left:130px;width:140px;height:3.5px;border-radius:9px;background:#A8ACAF}
 /* lock screen inside the replica */
@@ -221,18 +233,12 @@ body.is-night .lockscr{opacity:1;pointer-events:auto}
 .tab{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:rgba(7,11,17,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--muted);border-radius:999px;padding:8px 16px 8px 9px;font-size:14px;cursor:pointer;transition:color .3s,border-color .3s}
 .tab i{width:16px;height:16px;border-radius:50%}
 .tab[aria-selected="true"]{color:var(--text);border-color:var(--accent)}
-.themes .free{margin-top:16px;font-size:13px;color:var(--muted)}
+.themes .free{margin-top:16px;font-size:13px;color:var(--muted);max-width:34em}
+.themes .reset{margin-top:10px;background:none;border:0;padding:0;color:var(--accent-light);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.themes .reset[hidden]{display:none}
 
 /* ── sections ── */
 section.block{padding:150px 0}
-.life{display:grid;grid-template-columns:1fr 1.1fr;gap:5vw;align-items:center}
-.fan{position:relative;height:min(78vh,680px)}
-.fan .device{position:absolute;top:50%;left:50%;height:86%;transition:transform 1.2s var(--ease)}
-.fan .d1{transform:translate(-118%,-50%) rotate(-9deg) scale(.88)}
-.fan .d2{transform:translate(-50%,-52%);z-index:2}
-.fan .d3{transform:translate(18%,-50%) rotate(9deg) scale(.88)}
-.fan:hover .d1{transform:translate(-128%,-50%) rotate(-12deg) scale(.88)}
-.fan:hover .d3{transform:translate(28%,-50%) rotate(12deg) scale(.88)}
 .compare{width:100%;border-collapse:collapse;margin-top:56px;font-size:16px}
 .compare th,.compare td{padding:18px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 .compare th{font-weight:500;color:var(--muted);font-size:13px;letter-spacing:.18em;text-transform:uppercase}
@@ -248,13 +254,33 @@ section.block{padding:150px 0}
 .grid4 .n{font-size:12px;letter-spacing:.3em;color:var(--accent)}
 .grid4 h3{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;margin:16px 0 10px}
 .grid4 p{color:rgba(233,240,242,.62);font-size:15.5px}
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:60px}
-.plan{border:1px solid var(--line);border-radius:28px;padding:38px;background:var(--card);position:relative;overflow:hidden}
-.plan.premium::before{content:"";position:absolute;inset:-40% -40% auto auto;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 16%,transparent),transparent 65%)}
-.plan h3{font-family:var(--serif);font-weight:400;font-size:38px}
-.plan .price{color:var(--muted);margin:4px 0 22px}
+.plans{display:grid;grid-template-columns:1fr 1.12fr;gap:22px;margin-top:56px;align-items:stretch}
+.plan{border:1px solid var(--line);border-radius:28px;padding:36px 36px 30px;background:var(--card);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.plan.premium{border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 9%,transparent),rgba(255,255,255,.025) 55%);box-shadow:0 0 70px -24px color-mix(in srgb,var(--accent) 45%,transparent)}
+.plan.premium::before{content:"";position:absolute;inset:-40% -40% auto auto;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 16%,transparent),transparent 70%);pointer-events:none}
+.plan h3{font-family:var(--serif);font-weight:400;font-size:38px;line-height:1.1}
+.plan .price{color:var(--muted);margin:6px 0 20px}
+.plan .price b{font-family:var(--serif);font-weight:400;font-size:30px;color:var(--text)}
+.plan .tag{position:absolute;top:30px;right:30px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#14110A;background:var(--accent);border-radius:999px;padding:5px 11px;font-weight:600}
 .plan ul{list-style:none}
-.plan li{padding:9px 0;border-top:1px solid var(--line);color:rgba(233,240,242,.78)}
+.plan li{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line);color:rgba(233,240,242,.82)}
+.plan li::before{content:"✓";color:var(--accent);flex:none;width:14px}
+.plan.free li::before{color:rgba(233,240,242,.55)}
+.prices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 22px}
+.prices div{border:1px solid var(--line);border-radius:16px;padding:12px 12px 10px;background:rgba(7,11,17,.35)}
+.prices div.best{border-color:color-mix(in srgb,var(--accent) 60%,transparent)}
+.prices span{display:block;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.prices b{display:block;font-family:var(--serif);font-weight:400;font-size:24px;margin-top:4px;color:var(--text)}
+.prices small{display:block;font-size:12px;color:var(--accent-light);margin-top:2px;line-height:1.35}
+.orbs{display:flex;gap:10px;margin:4px 0 8px;align-items:center}
+.orbs button{width:30px;height:30px;border-radius:50%;border:1px solid rgba(233,240,242,.18);cursor:pointer;padding:0;transition:transform .3s var(--ease),box-shadow .3s}
+.orbs button:hover,.orbs button[aria-pressed="true"]{transform:scale(1.15);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent)}
+.orbs-cap{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.price-cta{margin-top:44px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.cta-btn{display:inline-flex;align-items:center;gap:12px;background:var(--cta);color:#14110A;text-decoration:none;border-radius:999px;padding:17px 30px;font-size:17px;font-weight:600;box-shadow:0 14px 40px -12px color-mix(in srgb,var(--cta) 55%,transparent);transition:background .3s,transform .3s var(--ease),box-shadow .3s}
+.cta-btn:hover,.cta-btn:focus-visible{background:var(--cta-light);transform:translateY(-2px);box-shadow:0 18px 50px -12px color-mix(in srgb,var(--cta) 70%,transparent)}
+.cta-btn svg{width:20px;height:20px}
+.price-note{font-size:13px;color:var(--muted);max-width:34em}
 .faq{max-width:860px}
 details{border-bottom:1px solid var(--line);padding:24px 0}
 details summary{cursor:pointer;font-family:var(--serif);font-size:clamp(20px,2vw,26px);list-style:none;display:flex;justify-content:space-between;gap:20px;align-items:center}
@@ -294,6 +320,9 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     .modes{height:400svh;view-timeline:--modes block}
     .modes .pin{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:stretch;padding:58px 0 0;overflow:hidden}
     .modes .pin > div{width:100%;min-width:0}
+    /* pinned: dots would suggest swiping sideways, so show a count and a cue to keep scrolling down */
+    .modes .dots{display:none!important}
+    .modes .scrollhint{display:flex}
     /* a flick can't run past a card: each resting point (5/35/65/95% of the pinned scroll) is a snap
        stop the scroll may not pass. Script switches snapping on only while the section is on screen,
        so the rest of the page scrolls natively. */
@@ -304,15 +333,14 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .step p{max-height:none;opacity:1;margin:0 auto;font-size:15px;line-height:1.5}
   .step .device{display:block;height:min(500px,max(300px,calc(100svh - 380px)));margin:0 auto 20px}
   .dots{display:flex!important;justify-content:center;gap:4px;margin-top:14px}
-  .life{grid-template-columns:1fr}
-  .fan{height:min(64vh,520px)}
-  .fan .d1{transform:translate(-100%,-50%) rotate(-8deg) scale(.8)}
-  .fan .d3{transform:translate(0%,-50%) rotate(8deg) scale(.8)}
   .compare td.c,.compare th.c{width:24%}
   .compare th,.compare td{padding:14px 6px;font-size:14.5px}
   .grid4{grid-template-columns:1fr 1fr}
   .grid4 > div{border-left:0;padding:26px 14px 26px 0;border-bottom:1px solid var(--line)}
   .plans{grid-template-columns:1fr}
+  .plan{padding:30px 22px 24px}
+  .plan .tag{position:static;display:inline-block;margin-bottom:14px;align-self:flex-start}
+  .prices b{font-size:21px}
   section.block{padding:100px 0}
 }
 @media (max-width:560px){
@@ -330,6 +358,11 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   60%, 70%  { transform:translate3d(calc((100vw - var(--W)) / 2 - 2 * (var(--W) + 14px)), 0, 0); animation-timing-function:ease-in-out }
   90%, 100% { transform:translate3d(calc((100vw - var(--W)) / 2 - 3 * (var(--W) + 14px)), 0, 0) }
 }
+/* pinned cards' cue (phones with scroll-driven animations only) */
+.scrollhint{display:none;align-items:center;justify-content:center;gap:10px;margin-top:16px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.scrollhint .sh-n{color:var(--accent);letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.scrollhint svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateY(-2px);opacity:.55}50%{transform:translateY(3px);opacity:1}}
 /* steps' dots (phones only) */
 .modes .snap{display:none}
 .dots{display:none}
@@ -337,7 +370,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
 .dots button i{width:6px;height:6px;border-radius:50%;background:rgba(233,240,242,.25);transition:background .3s,transform .3s}
 .dots button[aria-current="true"] i{background:var(--accent);transform:scale(1.35)}
 /* phones: a slim Get the app bar once the hero has scrolled away */
-.mcta{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;transform:translate(-50%,140%);display:none;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;background:#E2D0A0;color:#14110A;text-decoration:none;font-weight:500;font-size:15.5px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 26px rgba(226,208,160,.22);transition:transform .5s var(--ease)}
+.mcta{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));z-index:60;transform:translate(-50%,140%);display:none;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;background:var(--cta);color:#14110A;text-decoration:none;font-weight:500;font-size:15.5px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 26px color-mix(in srgb,var(--cta) 25%,transparent);transition:transform .5s var(--ease)}
 .mcta small{font-weight:400;opacity:.7;font-size:13px}
 .mcta.show{transform:translate(-50%,0)}
 @media (max-width:900px){ .mcta{display:flex} }
@@ -380,7 +413,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     </div>
     <div class="demo-col">
       <div class="device" id="demo">
-        <div class="scr" id="scr">
+        <div class="scr" id="scr"><div class="wake"></div>
           <div class="app" id="app">
             <div class="sb"><span class="t" id="clock">3:24</span><span class="ic">
               <svg width="17" height="13" viewBox="0 0 17 13"><rect x="0" y="9" width="3" height="4" rx=".8" fill="#E6E9EB"/><rect x="4.6" y="6" width="3" height="7" rx=".8" fill="#E6E9EB"/><rect x="9.2" y="3" width="3" height="10" rx=".8" fill="#E6E9EB"/><rect x="13.8" y="0" width="3" height="13" rx=".8" fill="#E6E9EB" opacity=".35"/></svg>
@@ -454,6 +487,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
         <div class="step"><div class="device"><div class="scr"><img class="shot" src="img/app-schedules.webp" alt="Schedules: morning prayer and family time"></div></div><div class="num">04 — SCHEDULES</div><h3>Rhythms that keep themselves.</h3><p>Morning prayer, family dinner, a calm bedtime. Set the rhythm once and Stillness begins on its own.</p></div>
       </div>
       <div class="dots" id="stepDots" aria-label="Choose a card"></div>
+      <div class="scrollhint" id="stepHint" aria-hidden="true"><span class="sh-n" id="stepCount">1 / 4</span><span class="sh-t">Keep scrolling</span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
     </div>
   </div>
 </section>
@@ -466,22 +500,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <div class="theme-name" id="themeName">Ocean</div>
     <p class="theme-line" id="themeLine">Moonlight falling through deep water. Slow swells, breathing.</p>
     <div class="tabs2" role="tablist" aria-label="Themes" id="tabs"></div>
-    <div class="free">Ocean is free. The other four come with Premium.</div>
-  </div>
-</section>
-
-<section class="block" id="seasons" aria-label="Seasons" style="overflow:hidden">
-  <div class="wrap life">
-    <div>
-      <div class="eyebrow rv">Life, in seasons</div>
-      <h2 class="big rv d1" style="margin-top:20px">No streaks.<br>No badges.<br><em>Just stars.</em></h2>
-      <p class="lead rv d2" style="margin-top:24px">Name the parts of life worth protecting: Morning Quiet, Family Dinners, Deep Work. Every lock you finish adds a star to that season's galaxy. No finish line and nothing to break, only a slowly growing picture of the time you've taken back.</p>
-    </div>
-    <div class="fan rv d1" aria-label="Three seasons in different themes">
-      <div class="device d1"><div class="scr"><img class="shot" src="img/app-life-dusk.webp" alt="A season galaxy in the Dusk theme" loading="lazy"></div></div>
-      <div class="device d2"><div class="scr"><img class="shot" src="img/app-life-ocean.webp" alt="A season galaxy in the Ocean theme: 350 sittings over 14 days" loading="lazy"></div></div>
-      <div class="device d3"><div class="scr"><img class="shot" src="img/app-life-green.webp" alt="A season galaxy in the Forest theme" loading="lazy"></div></div>
-    </div>
+    <div class="free">Ocean is free; the other four come with Premium. Tap one to see it across this page and in the phone up top.</div>
+    <button class="reset" id="themeReset" hidden>Back to the original colours</button>
   </div>
 </section>
 
@@ -499,6 +519,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
         <tr><td>Daily time limits per app</td><td class="c"><span class="yes">✓</span><small>with strict mode</small></td><td class="c"><span class="yes">✓</span><small>editable anytime</small></td></tr>
         <tr><td>Recurring schedules</td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="yes">✓</span></td></tr>
         <tr><td>A lock screen worth looking at</td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
+        <tr><td>No streaks to break<small>every finished lock adds a star to your own galaxy</small></td><td class="c"><span class="yes">✓</span></td><td class="c"><span class="no">—</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -517,15 +538,32 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   </div>
 </section>
 
-<section class="block" aria-label="Pricing" style="padding-top:40px">
+<section class="block" id="pricing" aria-label="Pricing" style="padding-top:40px">
   <div class="wrap">
     <div class="eyebrow rv">Pricing</div>
-    <h2 class="big rv d1" style="margin-top:20px">Free to start.<br><em>No ads, ever.</em></h2>
+    <h2 class="big rv d1" style="margin-top:20px">Start free.<br><em>Upgrade only if you love it.</em></h2>
+    <p class="lead rv d2" style="margin-top:22px">No ads on either plan, ever. Everything you need to disconnect is free; Premium lifts the limits and opens every sky.</p>
     <div class="plans">
-      <div class="plan rv"><h3>Free</h3><div class="price">Everything you need to disconnect</div>
-        <ul><li>Full Lock and Selective Lock</li><li>Up to 3 blocked apps</li><li>1 schedule, 1 season, 1 daily limit</li><li>The Ocean theme</li></ul></div>
-      <div class="plan premium rv d1"><h3>Premium</h3><div class="price">Monthly, yearly, or a one-time lifetime unlock</div>
-        <ul><li>Unlimited blocked apps</li><li>Unlimited schedules, seasons and daily limits</li><li>All five living skies</li><li>Supports a solo developer</li></ul></div>
+      <div class="plan free rv">
+        <h3>Free</h3><div class="price"><b>$0</b> &nbsp;forever</div>
+        <ul><li>Full Lock and Selective Lock</li><li>Up to 3 blocked apps</li><li>1 schedule, 1 season, 1 daily limit</li><li>The Ocean theme</li><li>No ads, no account</li></ul>
+      </div>
+      <div class="plan premium rv d1">
+        <span class="tag">7-day free trial</span>
+        <h3>Premium</h3><div class="price">Pick how you pay</div>
+        <div class="prices">
+          <div><span>Monthly</span><b>$2.99</b><small>per month</small></div>
+          <div class="best"><span>Yearly</span><b>$19.99</b><small>7 days free, then yearly</small></div>
+          <div><span>Lifetime</span><b>$27.99</b><small>founder price, once</small></div>
+        </div>
+        <ul><li>Everything in Free</li><li>Unlimited blocked apps</li><li>Unlimited schedules, seasons and daily limits</li><li>All five living skies</li><li>Supports a solo developer</li></ul>
+        <div class="orbs" id="planOrbs" role="group" aria-label="Try a theme on this page"></div>
+        <div class="orbs-cap">Tap a sky to try it on this page.</div>
+      </div>
+    </div>
+    <div class="price-cta rv">
+      <a class="cta-btn" href="https://play.google.com/store/apps/details?id=com.spiralstudio.stillness"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.6 2.3 13.7 12l-9.1 9.7c-.4-.2-.6-.6-.6-1.1V3.4c0-.5.2-.9.6-1.1Zm10.2 10.9 2.4 2.5-10.6 6 8.2-8.5Zm4.6-2.7c.7.4.7 1.4 0 1.9l-2.4 1.3-2.6-2.7 2.6-2.8 2.4 1.3ZM6.6 2.3l10.6 6-2.4 2.5L6.6 2.3Z"/></svg>Get Stillness free on Google Play</a>
+      <p class="price-note">Premium unlocks inside the app whenever you want it. US prices shown; Google Play shows your local price.</p>
     </div>
   </div>
 </section>
@@ -681,30 +719,199 @@ function runner(canvas, draw) {
 let night = 0, nightTarget = 0;
 const heroSky = runner($('#heroSky'), (ctx, w, h, t) => {
   night = REDUCE ? nightTarget : night + (nightTarget - night) * .04;
-  SKY.ocean(ctx, w, h, t);
+  SKY[siteTheme](ctx, w, h, t);
   if (night > .002) { ctx.fillStyle = `rgba(3,6,10,${.66 * night})`; ctx.fillRect(0, 0, w, h); stars(ctx, w, h, t + 3, { maxY: .8, alpha: .8 * night }); }
 });
-// The app's Ocean lock atmosphere (OceanBackground.kt): a deep vertical gradient, a skylight sheen
-// breathing at the top (15 s) and five swell crests breathing on 17–27 s periods. Drawn in dp.
+// The app's lock atmospheres (ui/lock/*Background.kt), drawn in dp on a 400-dp-wide screen.
+// Colours are the app's ARGB hex strings, 'AARRGGBB'.
 const bez = (x, x1 = .42, x2 = .58) => { let a = 0, b = 1; for (let k = 0; k < 24; k++) { const m = (a + b) / 2, bx = 3 * (1 - m) ** 2 * m * x1 + 3 * (1 - m) * m * m * x2 + m ** 3; if (bx < x) a = m; else b = m; } const u = (a + b) / 2; return 3 * (1 - u) * u * u + u ** 3; };
-const breathe = (t, ms) => { const u = (t * 1000 / ms) % 2; return bez(u < 1 ? u : 2 - u); };
-function oceanLock(ctx, W, H, t) {
-  const s = W / 400, w = 400, h = H / s; ctx.setTransform(s, 0, 0, s, 0, 0);
-  const bg = ctx.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, '#0B1624'); bg.addColorStop(.46, '#0A1A2C'); bg.addColorStop(1, '#071120');
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-  const blob = (x, y, r, sx, sy, col, stops) => {
-    ctx.save(); ctx.translate(x, y); ctx.scale(sx, sy); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-    stops.forEach(([p, a]) => g.addColorStop(p, `rgba(${col},${a})`)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.restore();
-  };
-  const a = .13 * (.55 + .45 * breathe(t, 15000));
-  blob(.5 * w, -.02 * h, .62 * w, 1.35, .85, '190,222,238', [[0, a], [1, 0]]);
-  for (const [y, x, ht, al, ms, tr] of [[.24, .42, 60, .10, 19000, 24], [.38, .58, 64, .07, 24000, 26], [.66, .46, 72, .12, 17000, 24], [.78, .55, 80, .16, 27000, 30], [.89, .48, 88, .20, 21000, 26]]) {
-    const r = ht * 1.5, dy = (.5 - breathe(t, ms)) * 2 * tr;
-    blob(x * w, y * h + dy, r, w * .75 / r, 1, '186,218,236', [[0, al], [.5, al * .35], [1, 0]]);
+const breathe = (t, ms) => { const u = (t * 1000 / ms) % 2; return bez(u < 1 ? u : 2 - u); }; // Compose EaseInOut, reversing
+const sweepLin = (t, ms) => { const u = (t * 1000 / ms) % 2; return u < 1 ? u : 2 - u; };     // LinearEasing, reversing
+const argb = h => [parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), parseInt(h.slice(6, 8), 16), parseInt(h.slice(0, 2), 16) / 255];
+const col = (h, a) => { const c = argb(h); return `rgba(${c[0]},${c[1]},${c[2]},${clamp(a === undefined ? c[3] : a, 0, 1)})`; };
+// a radial gradient from [pos, 'AARRGGBB'] stops, interpolated unpremultiplied like Android's shaders
+function appGrad(ctx, x, y, r, stops) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, Math.max(r, .01));
+  for (let i = 0; i < stops.length; i++) {
+    const [p0, h0] = stops[i], c0 = argb(h0); g.addColorStop(clamp(p0, 0, 1), `rgba(${c0[0]},${c0[1]},${c0[2]},${c0[3]})`);
+    if (i + 1 < stops.length) { const [p1, h1] = stops[i + 1], c1 = argb(h1); for (let k = 1; k < 6; k++) { const f = k / 6, m = j => Math.round(c0[j] + (c1[j] - c0[j]) * f); g.addColorStop(clamp(p0 + (p1 - p0) * f, 0, 1), `rgba(${m(0)},${m(1)},${m(2)},${c0[3] + (c1[3] - c0[3]) * f})`); } }
   }
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  return g;
 }
-const lockSky = runner($('#lockSky'), (ctx, w, h, t) => { if (document.body.classList.contains('is-night')) oceanLock(ctx, w, h, t); });
+// Compose's drawCircle(radialGradient) under an optional scale about the centre
+function appBlob(ctx, x, y, r, sx, sy, stops, rotDeg = 0, px = x, py = y) {
+  if (r <= 0) return; ctx.save();
+  if (rotDeg) { ctx.translate(px, py); ctx.rotate(rotDeg * Math.PI / 180); ctx.translate(-px, -py); }
+  ctx.translate(x, y); ctx.scale(sx, sy); ctx.fillStyle = appGrad(ctx, 0, 0, r, stops); ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill(); ctx.restore();
+}
+const withA = (h, a) => (Math.round(clamp(a, 0, 1) * 255).toString(16).padStart(2, '0') + h.slice(-6)).toUpperCase();
+const vstops = (ctx, y0, y1, stops) => { const g = ctx.createLinearGradient(0, y0, 0, y1); stops.forEach(([o, h, a]) => g.addColorStop(o, col(h, a))); return g; };
+function starGlow(ctx, x, y, r, h, a) { a = clamp(a, 0, 1); appBlob(ctx, x, y, r * 5, 1, 1, [[0, withA(h, .6 * a)], [1, withA(h, 0)]]); ctx.fillStyle = col(h, a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+function dpFrame(ctx, W, H, bg) { const s = W / 400, w = 400, h = H / s; ctx.setTransform(s, 0, 0, s, 0, 0); ctx.fillStyle = vstops(ctx, 0, h, bg); ctx.fillRect(0, 0, w, h); return [w, h]; }
+
+// Eclipse's corona streamers (Ritual.kt coronaField), in limb units: the disc's limb is radius 1
+function coronaField(color, baseAlpha, count, seed, minL, maxL, axis = 12) {
+  const hash = x => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); }, span = Math.max(maxL - minL, .01), step = 360 / count, B = 8;
+  const rays = Array.from({ length: count }, (_, i) => {
+    const h1 = hash(i * 1.13 + seed * 7.7), h2 = hash(i * 3.71 + seed * 2.3 + 11), h3 = hash(i * .77 + seed * 5.1 + 23), h4 = hash(i * 2.31 + seed * 3.9 + 41);
+    const angle = i * step + (h1 - .5) * step * 1.4, env = .3 + .7 * Math.abs(Math.cos((angle - axis) * Math.PI / 180)) ** .55;
+    const raw = clamp(minL + span * env * (.28 + .85 * h2 * h2), minL, maxL), bucket = clamp(Math.round((raw - minL) / span * (B - 1)), 0, B - 1);
+    const len = minL + span * bucket / (B - 1), broad = h3 < .26, bend = (h4 - .5) * len * .34;
+    return { angle, len, bend, bucket, width: broad ? .07 + .075 * h4 : .006 + .017 * h3, alpha: (.45 + .55 * h3) * (.4 + .6 * env) * (1.05 - .4 * bucket / (B - 1)) * (broad ? .34 : 1) };
+  });
+  return { rays, color, baseAlpha, minL, span };
+}
+function drawCoronaField(ctx, f, x, y, limbR, turnDeg, alpha) {
+  if (alpha <= .004 || limbR <= 0) return;
+  const brushes = Array.from({ length: 8 }, (_, b) => { const len = f.minL + f.span * b / 7, g = ctx.createLinearGradient(1, 0, 1 + len, 0);
+    [[0, 0], [.14, 1], [.34, .56], [.55, .27], [.75, .11], [.9, .03], [1, 0]].forEach(([o, k]) => g.addColorStop(o, col(f.color, f.baseAlpha * k))); return g; });
+  ctx.save(); ctx.translate(x, y); ctx.scale(limbR, limbR); ctx.rotate(turnDeg * Math.PI / 180); ctx.lineCap = 'round';
+  for (const r of f.rays) {
+    ctx.save(); ctx.rotate(r.angle * Math.PI / 180); ctx.globalAlpha = clamp(alpha * r.alpha, 0, 1); ctx.strokeStyle = brushes[r.bucket]; ctx.lineWidth = r.width;
+    ctx.beginPath(); ctx.moveTo(1, 0); ctx.bezierCurveTo(1 + r.len * .35, r.bend * .12, 1 + r.len * .75, r.bend * .62, 1 + r.len, r.bend); ctx.stroke(); ctx.restore();
+  }
+  ctx.restore();
+}
+const ORB_CORONA = coronaField('FFF2ECDC', .62, 58, 3, .18, .40);
+const SKY_CORONA = coronaField('FFE9F0FC', .34, 112, 2, .14, 1.55);
+// the orb's corona (drawSphereCorona): warm bloom, turning streamers, pearl rim, all outside the limb
+function orbCorona(ctx, x, y, d, t, alpha) {
+  if (alpha <= .004) return; const swell = breathe(t, 16000), turn = (t / 420 * 360) % 360;
+  ctx.save(); ctx.globalAlpha = alpha * (.88 + .12 * swell);
+  appBlob(ctx, x, y, d * 1.368 / 2 * (.97 + .06 * swell), 1, 1, [[0, '00FAF4E4'], [.35, '00FAF4E4'], [.39, '57FAF4E4'], [.49, '24EADCBE'], [.64, '0ADACAAA'], [.82, '00DACAAA'], [1, '00DACAAA']]);
+  ctx.restore(); drawCoronaField(ctx, ORB_CORONA, x, y, d / 2, turn, alpha);
+  ctx.save(); ctx.globalAlpha = alpha; appBlob(ctx, x, y, d * 1.189 / 2, 1, 1, [[0, '00F8FAFE'], [.81, '00F8FAFE'], [.85, '8CF8FAFE'], [.9, '42E8EEFA'], [.95, '14D8E2F4'], [1, '00D8E2F4']]); ctx.restore();
+}
+
+const LOCKS = {
+  // OceanBackground.kt: breathing skylight sheen and five swell crests
+  ocean(ctx, W, H, t) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF0B1624'], [.46, 'FF0A1A2C'], [1, 'FF071120']]);
+    const a = .13 * (.55 + .45 * breathe(t, 15000));
+    appBlob(ctx, .5 * w, -.02 * h, .62 * w, 1.35, .85, [[0, withA('BEDEEE', a)], [1, '00BEDEEE']]);
+    for (const [y, x, ht, al, ms, tr] of [[.24, .42, 60, .10, 19000, 24], [.38, .58, 64, .07, 24000, 26], [.66, .46, 72, .12, 17000, 24], [.78, .55, 80, .16, 27000, 30], [.89, .48, 88, .20, 21000, 26]]) {
+      const r = ht * 1.5, dy = (.5 - breathe(t, ms)) * 2 * tr;
+      appBlob(ctx, x * w, y * h + dy, r, w * .75 / r, 1, [[0, withA('BADAEC', al)], [.5, withA('BADAEC', al * .35)], [1, '00BADAEC']]);
+    }
+  },
+  // DuskBackground.kt: ember dome and cloud bands that sink as the session goes on, stars surfacing
+  dusk(ctx, W, H, t, p) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF0B0F24'], [.32, 'FF161531'], [.58, 'FF2E2342'], [.82, 'FF56374A'], [1, 'FF74463F']]);
+    const sv = .12 + .73 * p;
+    for (const [x, y, r, a] of [[.18, .24, 1.3, .7], [.70, .16, 1, .5], [.42, .12, 1, .42], [.86, .34, 1.1, .5], [.10, .44, 1, .36], [.58, .30, 1, .4]]) { ctx.fillStyle = col('FFE6E8F6', a * sv); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); }
+    starGlow(ctx, .31 * w, .25 * h, 1.3, 'FFEEF0F8', .55 + .45 * breathe(t, 7000));
+    starGlow(ctx, .22 * w, .12 * h, 1, 'FFE6E8F4', (.45 + .5 * breathe(t, 6000)) * (.4 + .6 * sv));
+    starGlow(ctx, .76 * w, .20 * h, .8, 'FFDFE2F0', (.4 + .5 * breathe(t, 8000)) * (.4 + .6 * sv));
+    const hd = breathe(t, 70000); appBlob(ctx, .5 * w + (hd - .5) * .028 * w, .40 * h + (hd - .5) * .02 * h, .62 * w, 1.5, .5, [[0, '1F7A5C8E'], [1, '007A5C8E']]);
+    const das = (.95 - .67 * p) * (.55 + .45 * breathe(t, 12000)), sink = .14 * h * p;
+    appBlob(ctx, .5 * w, h + .10 * h + sink, .72 * w, 1.45, 1.05, [[0, withA('EE9E5C', .34 * das)], [.48, withA('C47460', .14 * das)], [.75, '00C47460'], [1, '00C47460']]);
+    const bf = 1 - .6 * p;
+    for (const [y, ht, c, a, ms, range, s0, s1] of [[.62, 46, 'E29268', .22, 23000, 26, -.15, .70], [.71, 52, 'CE7C6E', .18, 29000, 22, .30, 1.20], [.80, 56, 'BA6E60', .16, 26000, 24, -.20, .75]]) {
+      const dr = breathe(t, ms), al = a * bf, dx = (dr - .5) * 2 * range, dyy = (.5 - dr) * .6 * range, half = (s1 - s0) / 2 * w;
+      appBlob(ctx, (s0 + s1) / 2 * w + dx, (y + sink / h) * h + dyy, ht * 1.6, half / ht, 1, [[0, withA(c, al)], [.5, withA(c, al * .45)], [1, withA(c, 0)]]);
+    }
+    const na = .55 * p; if (na > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF060710', .42 * na / .55], [.42, 'FF060710', .12 * na / .55], [1, 'FF060710', na]]); ctx.fillRect(0, 0, w, h); }
+  },
+  // ForestBackground.kt: canopy shadows, swaying light shafts, fireflies, dawn gathering below
+  forest(ctx, W, H, t, p) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF0B1710'], [.55, 'FF081209'], [1, 'FF050D07']]);
+    const canopy = (x, y, r, a) => appBlob(ctx, x, y, r, 1, 1, [[0, withA('020704', a)], [.5, withA('020704', a * .4)], [1, '00020704']]);
+    canopy(-.10 * w, -.12 * h, .62 * w, .9); canopy(1.12 * w, -.10 * h, .60 * w, .85);
+    const A = breathe(t, 28000), B = breathe(t, 34000), beam = 1.06 * h;
+    const shaft = (xf, wd, a, ang, sway) => { const ox = xf * w + sway, oy = -.06 * h; appBlob(ctx, ox, oy, beam, wd / beam, 1, [[0, withA('C8E8C8', a)], [.32, withA('AAD2AA', a * .42)], [.62, withA('AAD2AA', a * .12)], [.82, '00AAD2AA'], [1, '00AAD2AA']], ang, ox, 0); };
+    shaft(.22, 150, .26, 14 + (A - .5) * 1.5, (A - .5) * 30); shaft(.52, 92, .19, 20 - (B - .5) * 2, (.5 - B) * 24); shaft(.70, 60, .22, 14.5 + (A - .5) * 1.5, (A - .5) * 30);
+    appBlob(ctx, .08 * w, .48 * h, .55 * w, 1, 1, [[0, '38608A64'], [1, '00608A64']]);
+    const fly = (x, y, r, a) => { a = clamp(a, 0, 1); appBlob(ctx, x, y, r * 6, 1, 1, [[0, withA('E2D092', .55 * a)], [1, '00E2D092']]); ctx.fillStyle = col('FFE2D092', a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); };
+    fly(.28 * w, .48 * h, 1.75, .35 + .6 * breathe(t, 5000)); fly(.70 * w, .60 * h, 1.5, .30 + .6 * breathe(t, 7000)); fly(.46 * w, .72 * h, 1.5, .28 + .55 * breathe(t, 6000));
+    const dawn = .05 + .95 * p, rise = .12 * h * (1 - p);
+    appBlob(ctx, .5 * w, h + .06 * h + rise, .62 * h, 1.5, .85, [[0, withA('CAB476', .28 * dawn)], [.45, withA('8C7E4E', .09 * dawn)], [.72, '008C7E4E'], [1, '008C7E4E']]);
+  },
+  // AuroraBackground.kt: drifting stars and five swaying teal/violet curtains
+  aurora(ctx, W, H, t) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF05090F'], [.6, 'FF081019'], [1, 'FF0A141D']]);
+    const sd = sweepLin(t, 90000), dx = (sd - .5) * .028 * w, dy = (.5 - sd) * .022 * h;
+    for (const [x, y, r, a] of [[.15, .18, 1.4, .5], [.72, .12, 1, .38], [.88, .32, 1.2, .42], [.35, .09, 1, .3], [.55, .24, 1.1, .34], [.08, .44, 1, .26], [.92, .58, 1.3, .32], [.28, .40, 1, .26], [.64, .47, 1.1, .3], [.80, .74, 1, .24], [.18, .68, 1.2, .28], [.47, .62, 1, .22]]) { ctx.fillStyle = col('FFD7E8EE', a); ctx.beginPath(); ctx.arc(x * w + dx, y * h + dy, r, 0, TAU); ctx.fill(); }
+    const A = breathe(t, 16000), B = breathe(t, 19000), C = breathe(t, 14000);
+    for (const [xf, wd, hf, a, sw, spx, tilt] of [[.10, 70, .46, .20, A, 28, -3.5], [.24, 100, .52, .16, B, 26, 3], [.45, 60, .40, .22, C, 21, -2.5], [.58, 120, .56, .13, A, 28, -3.5], [.79, 80, .44, .18, B, 26, 3]]) {
+      const cx = xf * w + (sw - .5) * 2 * spx, ht = hf * h, rot = tilt + (sw - .5) * 1.2, r1 = ht * .62, r2 = ht * .30;
+      appBlob(ctx, cx, .30 * ht, r1, wd / (r1 * 1.1), 1, [[0, withA('76DEBA', a)], [.5, withA('76DEBA', a * .35)], [1, '0076DEBA']], rot, cx, 0);
+      appBlob(ctx, cx, .74 * ht, r2, wd / (r2 * 1.3), 1, [[0, withA('A08CE6', a * .45)], [1, '00A08CE6']], rot, cx, 0);
+    }
+    ctx.fillStyle = vstops(ctx, .8 * h, h, [[0, '0004070B'], [1, 'D904070B']]); ctx.fillRect(0, .8 * h, w, .2 * h);
+  },
+  // EclipseBackground.kt: the 30-second arrival (sun, crescent, Baily's beads, diamond ring) then totality
+  eclipse(ctx, W, H, t, p, arrival) {
+    const [w, h] = dpFrame(ctx, W, H, [[0, 'FF141628'], [.55, 'FF0E101E'], [1, 'FF090A14']]);
+    const WT = [0, .53, .83, 1], WP = [0, .64, .74, 1], WM = [1.208, .522, .547, 1.529];
+    const phase = x => { x = clamp(x, 0, 1); let i = 0; while (i < 2 && x > WT[i + 1]) i++; const hh = WT[i + 1] - WT[i], u = clamp((x - WT[i]) / hh, 0, 1), u2 = u * u, u3 = u2 * u;
+      return (2 * u3 - 3 * u2 + 1) * WP[i] + (u3 - 2 * u2 + u) * hh * WM[i] + (-2 * u3 + 3 * u2) * WP[i + 1] + (u3 - u2) * hh * WM[i + 1]; };
+    const q = phase(arrival), ramp = (a, b) => clamp((q - a) / (b - a), 0, 1);
+    const sunR = Math.min(w * .13, h * .068), u = sunR / 65, sx = w * .5, sy = h * .235;
+    const moonR = 67 * u, moonDx = 142 * u * (1 - Math.min(1, q / .72)), crescent = Math.max(0, (moonDx - 2 * u) / u);
+    const day = clamp(1 - .10 * ramp(0, .44) - .55 * ramp(.44, .65) - .35 * ramp(.65, .709), 0, 1), veil = .64 * ramp(.44, .70);
+    const hot = ramp(.48, .72), alive = clamp(crescent / 3.5, 0, 1), cor = ramp(.705, .726), sv = ramp(.68, .82), hor = ramp(.70, .84), rush = ramp(.65, .73);
+    const swell = breathe(t, 16000), tA = breathe(t, 6000), tB = breathe(t, 8500), turn = (t / 420 * 360) % 360;
+    if (day > .004) {
+      appBlob(ctx, sx, sy, sunR * (1.2 + 1.55 * day), 1, 1, [[0, withA('FFE9BE', .18 * day)], [.42, withA('F6DDB4', .085 * day)], [.74, withA('D8C8A8', .03 * day)], [1, '00D8C8A8']]);
+      appBlob(ctx, sx, sy, w * 1.5, 1, 1, [[0, withA('9AA8C8', .07 * day)], [1, '009AA8C8']]);
+    }
+    if (veil > .004) { ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FF04050C', veil], [.62, 'FF05060E', veil * .88], [1, 'FF07080F', veil * .7]]); ctx.fillRect(0, 0, w, h); }
+    if (rush > .001 && rush < .999) { const a = .5 * Math.sin(Math.PI * rush) ** .6, bc = w * (-1.3 + 2.15 * rush), hf = w * .8, g = ctx.createLinearGradient(bc - hf, 0, bc + hf, 0); g.addColorStop(0, col('00040510')); g.addColorStop(.5, col('FF040510', a)); g.addColorStop(1, col('00040510')); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); }
+    if (sv > .004) {
+      [[.14, .09, 1.1, .6], [.29, .06, .9, .42], [.44, .11, 1, .5], [.62, .07, .9, .4], [.76, .12, 1.1, .55], [.90, .08, .9, .38], [.08, .22, 1, .45], [.35, .19, .9, .36], [.68, .24, 1, .44], [.92, .31, .9, .38], [.06, .40, 1, .4], [.24, .45, .9, .34], [.78, .43, 1, .42], [.50, .50, .9, .3], [.16, .58, .9, .32], [.88, .56, 1, .36]]
+        .forEach(([x, y, r, a], i) => { ctx.fillStyle = col('FFE8ECF8', a * sv * (.68 + .32 * (i % 2 ? tB : tA))); ctx.beginPath(); ctx.arc(x * w, y * h, r, 0, TAU); ctx.fill(); });
+      starGlow(ctx, .19 * w, .13 * h, 1.2, 'FFEFF2FA', (.5 + .45 * tB) * sv); starGlow(ctx, .83 * w, .18 * h, 1, 'FFE6EAF6', (.45 + .45 * tA) * sv);
+    }
+    if (hor > .004) {
+      ctx.fillStyle = vstops(ctx, 0, h, [[0, '00FF9A6E'], [.7, '00FF9A6E'], [.88, 'FFE8875E', .07 * hor], [1, 'FFFFB07E', .17 * hor]]); ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = vstops(ctx, 0, h, [[0, 'FFB98A78', .05 * hor], [.16, '00B98A78'], [1, '00B98A78']]); ctx.fillRect(0, 0, w, h);
+    }
+    if (cor > .004) {
+      const b = cor * (.94 + .12 * swell), L = 1 / 2.7;
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.arc(sx, sy, sunR, 0, TAU, true); ctx.clip('evenodd');
+      appBlob(ctx, sx, sy, sunR * 2.7, 1, 1, [[0, '00E9F0FC'], [L * .985, '00E9F0FC'], [L, withA('E9F0FC', .62 * b)], [L * 1.08, withA('E7EFFB', .42 * b)], [L * 1.18, withA('E5EDFA', .27 * b)], [L * 1.32, withA('E2EAF8', .16 * b)], [L * 1.5, withA('DEE7F6', .09 * b)], [L * 1.72, withA('DAE3F4', .048 * b)], [L * 1.98, withA('D8E1F2', .023 * b)], [L * 2.25, withA('D6E0F2', .008 * b)], [.9, withA('D6E0F2', .0015 * b)], [1, '00D6E0F2']]);
+      drawCoronaField(ctx, SKY_CORONA, sx, sy, sunR, turn, b);
+      appBlob(ctx, sx, sy, sunR * 1.16, 1, 1, [[0, '00F8FAFE'], [.845, '00F8FAFE'], [.875, withA('F8FAFE', .55 * b)], [.915, withA('EAF0FC', .24 * b)], [.96, withA('DCE6F8', .07 * b)], [1, '00DCE6F8']]);
+      ctx.restore();
+    }
+    if (alive > .004 && day > .004) { const a = (.30 + .42 * hot) * alive; appBlob(ctx, sx - .92 * hot * sunR, sy, sunR * (1.75 - .85 * hot), 1, 1, [[0, withA('FFFBF0', a)], [.5, withA('FFEFCE', a * .35)], [1, '00FFEFCE']]); }
+    const sunUp = crescent > 0;
+    if (sunUp && day > .004) { const gr = sunR + 34 * u * (.9 + .1 * breathe(t, 11000)); appBlob(ctx, sx, sy, gr, 1, 1, [[0, withA('FFF0CE', .5 * day)], [sunR / gr, withA('FFF0CE', .5 * day)], [1, '00FFF0CE']]); }
+    if (sunUp) {
+      ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = appGrad(ctx, sx - 5.2 * u, sy - 10.4 * u, sunR, [[0, 'FFFFFFFF'], [.34, 'FFFFFFFA'], [.62, 'FFFFF6DC'], [.84, 'FFFFE6B2'], [1, 'FFFCD190']]); ctx.fillRect(sx - sunR, sy - sunR, sunR * 2, sunR * 2); ctx.restore();
+      if (hot > .004) { ctx.fillStyle = col('FFFFFFFF', .85 * hot); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.fill(); }
+    }
+    const chromo = ramp(.702, .710) * (.42 - .29 * ramp(.712, .78));
+    if (chromo > .002) {
+      const a = chromo * (.9 + .1 * breathe(t, 9000)); ctx.strokeStyle = col('FFFFC0A4', a * .75); ctx.lineWidth = 1.1 * u; ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.stroke();
+      for (const [ang, size, k] of [[118, .085, 1], [196, .055, .7], [302, .07, .9], [58, .04, .55]]) { const rr = ang * Math.PI / 180; appBlob(ctx, sx + Math.cos(rr) * sunR * 1.01, sy + Math.sin(rr) * sunR * 1.01, size * sunR, 1, 1, [[0, withA('FF9A86', a * 1.6 * k)], [.5, withA('FF7A6E', a * .7 * k)], [1, '00FF7A6E']]); }
+    }
+    ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sunR, 0, TAU); ctx.clip(); ctx.fillStyle = '#05050C'; ctx.beginPath(); ctx.arc(sx + moonDx, sy, moonR, 0, TAU); ctx.fill(); ctx.restore();
+    for (const [bx, by, size, st, en, ph] of [[-56, 33, 3, .692, .702, 0], [-61, 22, 5.5, .693, .706, 1.7], [-64, 11, 3.5, .695, .709, 3.1], [-65, 0, 7, .694, .7155, .8], [-63.5, -13.5, 4.5, .696, .7075, 2.4], [-59.5, -26, 3, .692, .700, 4.2]]) {
+      const tt = (q - st) / (en - st); if (tt <= 0 || tt >= 1) continue;
+      const a = clamp(Math.min(1, tt / .18) * Math.min(1, (1 - tt) / .28) * (.72 + .28 * Math.sin(q * 1600 + ph)), 0, 1); if (a <= .01) continue;
+      const x = sx + bx * u, y = sy + by * u, r = size * u / 2; appBlob(ctx, x, y, r * 4.5, 1, 1, [[0, withA('FFFDF4', .55 * a)], [1, '00FFFDF4']]); ctx.fillStyle = col('FFFFFFFC', a); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    }
+    const rt = (q - .704) / .021;
+    if (rt > 0 && rt < 1) {
+      const sc = rt < .52 ? .3 + 1.15 * (rt / .52) : 1.45 - .95 * ((rt - .52) / .48), a = Math.sin(Math.PI * rt) ** .8, cx = sx - 60 * u, cy = sy;
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy);
+      appBlob(ctx, cx, cy, 96 * u, 1, 128 / 192, [[0, withA('FFFDF2', .42 * a)], [.5, withA('FFF2D8', .14 * a)], [1, '00FFF2D8']]);
+      for (const [len, th, k, ang] of [[208, 3, 1, 0], [124, 3, .72, 90], [76, 2, .42, 45], [76, 2, .42, -45]]) {
+        const aa = a * k; if (aa <= .01) continue; ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang * Math.PI / 180); ctx.translate(-cx, -cy);
+        for (const [tk, mul] of [[th * 3.2 * u, .3], [th * u, 1]]) { const g = ctx.createLinearGradient(cx - len * u / 2, 0, cx + len * u / 2, 0); g.addColorStop(0, col('00FFF6DE')); g.addColorStop(.5, col('FFFFFDF4', aa * mul)); g.addColorStop(1, col('00FFF6DE')); ctx.fillStyle = g; ctx.fillRect(cx - len * u / 2, cy - tk / 2, len * u, tk); }
+        ctx.restore();
+      }
+      appBlob(ctx, cx, cy, 19 * u, 1, 1, [[0, withA('FFFFFF', .9 * a)], [.5, withA('FFF6DE', .3 * a)], [1, '00FFF6DE']]);
+      ctx.fillStyle = col('FFFFFFFF', a); ctx.beginPath(); ctx.arc(cx, cy, 5 * u, 0, TAU); ctx.fill(); ctx.restore();
+    }
+  },
+};
+let siteTheme = 'ocean', lockT0 = 0, lockTotal = 1;
+const lockSky = runner($('#lockSky'), (ctx, w, h, t) => {
+  if (!document.body.classList.contains('is-night')) return;
+  const el = Date.now() - lockT0; LOCKS[siteTheme](ctx, w, h, t, clamp(el / lockTotal, 0, 1), el / 30000); ctx.setTransform(1, 0, 0, 1, 0, 0);
+});
 
 /* ── live app replica ────────────────────────────────────────── */
 // Mirrors the app's code: DURATION_STEPS + bands (SessionIntent.kt), RadialDial.kt,
@@ -713,8 +920,8 @@ const STEPS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 60, 75, 90, 105, 120, 180, 240
 // [name, max minutes, hueShift, holdMillis]
 const BANDS = [['Breath', 15, 0, 600], ['Focus', 45, 10, 900], ['Presence', 120, 25, 1200], ['Retreat', 360, 45, 1500], ['Rest', 720, 70, 1800], ['Solitude', 1440, 95, 2200]];
 const bandOf = m => BANDS.findIndex(b => m <= b[1]);
-const N = STEPS.length, ACC = [183, 215, 234]; // Ocean accent #B7D7EA
-let idx = STEPS.indexOf(45), mode = 'sel';
+const N = STEPS.length; let ACC = [183, 215, 234]; // the theme's accent (Ocean #B7D7EA until another is picked)
+let idx = STEPS.indexOf(45), mode = 'sel', sweep = Infinity; // sweep: how far the intro has filled the dial
 
 // tintForMode: OkLab mix of the accent toward WarmTintTarget #E8B87A by hueShift/240
 const lin = c => (c /= 255) <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
@@ -728,7 +935,8 @@ function rgbOf([L, a, b]) {
   const l = (L + .3963377774 * a + .2158037573 * b) ** 3, m = (L - .1055613458 * a - .0638541728 * b) ** 3, s = (L - .0894841775 * a - 1.291485548 * b) ** 3;
   return [gam(4.0767416621 * l - 3.3077115913 * m + .2309699292 * s), gam(-1.2684380046 * l + 2.6097574011 * m - .3413193965 * s), gam(-.0041960863 * l - .7034186147 * m + 1.707614701 * s)];
 }
-const TINT = BANDS.map(([, , shift]) => { const A = oklab(ACC), W = oklab([232, 184, 122]), t = shift / 240; return rgbOf(A.map((v, i) => v + (W[i] - v) * t)).map(Math.round); });
+const tints = () => BANDS.map(([, , shift]) => { const A = oklab(ACC), W = oklab([232, 184, 122]), t = shift / 240; return rgbOf(A.map((v, i) => v + (W[i] - v) * t)).map(Math.round); });
+let TINT = tints();
 
 // dial: 28 ticks round the full circle, curved band labels outside
 const svg = $('#dialSvg'), NS = 'http://www.w3.org/2000/svg', C0 = 180, RING = 360 * .342, LABEL_R = RING + 25;
@@ -758,7 +966,7 @@ function render() {
   const m = STEPS[idx], b = bandOf(m), [n, u] = big(m);
   $('#oNum').textContent = n; $('#oUnit').textContent = u; $('#aTitle').textContent = BANDS[b][0];
   $('#oNum').style.fontSize = $('#oNum').style.lineHeight = (n.includes(':') ? 44 : n.length >= 3 ? 50 : 58) * numScale(idx) + 'px';
-  ticks.forEach((t, i) => { const on = i <= idx, c = on ? TINT[bandOf(STEPS[i])] : [42, 54, 69]; t.setAttribute('stroke', `rgba(${c},${on ? .95 : .45})`); });
+  ticks.forEach((t, i) => { const on = i <= Math.min(idx, sweep), c = on ? TINT[bandOf(STEPS[i])] : [42, 54, 69]; t.setAttribute('stroke', `rgba(${c},${on ? .95 : .45})`); });
   labels.forEach((l, i) => l.classList.toggle('on', i === b));
   orbFrom = orbD; orbTo = BASE * sizeFactor(idx); orbT0 = performance.now(); wake();
   $('#dial').setAttribute('aria-valuetext', total(m).replace(' min', ' minutes'));
@@ -804,25 +1012,34 @@ dial.addEventListener('keydown', e => {
 const cv = $('#orbCv'), cx = cv.getContext('2d'), offA = document.createElement('canvas'), offB = document.createElement('canvas');
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 // [cx, cy, r, stops[pos, '#rrggbb', alpha]]; Compose's Transparent is transparent black, interpolated unpremultiplied
-const SPHERE = {
-  day: { layers: [[.36, .30, .95, [[0, '#2C5A78', 1], [.48, '#1B4058', 1], [.80, '#0F2A40', 1], [1, '#0A1C2E', 1]]], [.34, .24, .98, [[0, '#E2F4FE', .502], [.38, '#B4D6EC', .122], [.62, '#000000', 0]]]], lit: ['#B2DAF2', .102], limb: ['#030A12', .6] },
-  night: { layers: [[.40, .32, .95, [[0, '#16344C', 1], [.46, '#0E2338', 1], [.78, '#08182A', 1], [1, '#050F1C', 1]]], [.30, .24, .90, [[0, '#B7D7EA', .102], [.44, '#000000', 0]]]], lit: ['#A6C8E4', .078], limb: ['#030810', .7] },
+// The five themes' colours (ThemeColors.kt) and sky spheres, day and night (Ritual.kt).
+// Layer: [cx, cy, radius, stops, squashY], all in sphere diameters; stops are [pos, 'AARRGGBB'].
+const APP_THEMES = {
+  ocean: { accent: 'B7D7EA', light: 'DCEDF8', active: 'DEEBF4', subtitle: 'C4DCEC', numeral: 'E8F4FA',
+    day: { body: [.36, .30, .95, [[0, 'FF2C5A78'], [.48, 'FF1B4058'], [.80, 'FF0F2A40'], [1, 'FF0A1C2E']]], sheen: [.34, .24, .98, [[0, '80E2F4FE'], [.38, '1FB4D6EC'], [.62, '00B4D6EC'], [1, '00B4D6EC']]], drop: '6182B9D7', lit: '1AB2DAF2', limb: '99030A12' },
+    night: { body: [.40, .32, .95, [[0, 'FF16344C'], [.46, 'FF0E2338'], [.78, 'FF08182A'], [1, 'FF050F1C']]], sheen: [.30, .24, .90, [[0, '1AB7D7EA'], [.44, '00B7D7EA'], [1, '00B7D7EA']]], lit: '14A6C8E4', limb: 'B3030810' } },
+  dusk: { accent: 'ECA36B', light: 'F2BE8E', active: 'F2DFC9', subtitle: 'ECC4A0', numeral: 'F6E8D4',
+    day: { body: [.36, .30, .95, [[0, 'FF52426E'], [.46, 'FF3A2C58'], [.78, 'FF241F44'], [1, 'FF181534']]], event: [.50, 1.10, .88, [[0, '66F8A65E'], [.42, '33EA8E62'], [.66, '14C47068'], [.84, '00C47068'], [1, '00C47068']], .727], sheen: [.34, .26, .98, [[0, '42F0DEFF'], [.34, '12C4A8E4'], [.58, '00C4A8E4'], [1, '00C4A8E4']]], drop: '66D2845C', lit: '1FBA9CE0', limb: '8C0A081A' },
+    night: { body: [.40, .32, .95, [[0, 'FF2A2348'], [.46, 'FF1C1738'], [.78, 'FF120E28'], [1, 'FF0B0819']]], sheen: [.30, .24, .90, [[0, '1FD2C4F0'], [.44, '00D2C4F0'], [1, '00D2C4F0']]], lit: '147864AA', limb: 'B3060510' } },
+  forest: { accent: 'C2D89C', light: 'E0ECC4', active: 'E3EDD6', subtitle: 'D1E2BE', numeral: 'EAF2DC',
+    day: { body: [.36, .30, .95, [[0, 'FF35563C'], [.48, 'FF23422B'], [.80, 'FF15301C'], [1, 'FF0E2113']]], event: [.46, .96, .48, [[0, '386EA068'], [.75, '006EA068'], [1, '006EA068']], .42], sheen: [.34, .24, .98, [[0, '6BEEDC94'], [.38, '1ACEC074'], [.62, '00CEC074'], [1, '00CEC074']]], drop: '5C84B070', lit: '1AD6E8AC', limb: '8C030904' },
+    night: { body: [.40, .32, .95, [[0, 'FF16281A'], [.46, 'FF0F1D13'], [.78, 'FF0A140C'], [1, 'FF060D07']]], sheen: [.30, .24, .90, [[0, '14C8E8C8'], [.44, '00C8E8C8'], [1, '00C8E8C8']]], lit: '148CB47C', limb: 'B3030704' } },
+  aurora: { accent: 'B4A8E2', light: 'DCD4F4', active: 'E2DCF4', subtitle: 'CEC6EC', numeral: 'ECF2F8',
+    day: { body: [.36, .30, .95, [[0, 'FF28324F'], [.50, 'FF1A2240'], [.80, 'FF101630'], [1, 'FF0B1022']]], event: [.55, .44, .56, [[0, '3D988ADE'], [.66, '00988ADE'], [1, '00988ADE']], .40], sheen: [.34, .22, .98, [[0, '6680E8C2'], [.40, '1780E8C2'], [.64, '0080E8C2'], [1, '0080E8C2']]], drop: '577EC8B4', lit: '1AACC6EE', limb: '9903050E' },
+    night: { body: [.40, .32, .95, [[0, 'FF171B34'], [.46, 'FF0F1226'], [.78, 'FF0A0C1C'], [1, 'FF070812']]], sheen: [.30, .22, .90, [[0, '1480E8C2'], [.44, '0080E8C2'], [1, '0080E8C2']]], lit: '148C96C8', limb: 'B3030510' } },
+  eclipse: { accent: 'E2D0A0', light: 'F2E6C4', active: 'F0E4C2', subtitle: 'E8DAB4', numeral: 'F8F0DE',
+    day: { body: [.37, .30, .95, [[0, 'FF2A2838'], [.44, 'FF1B1A28'], [.76, 'FF100F1A'], [1, 'FF07070D']]], event: [.50, 1.08, .86, [[0, '21FACE98'], [.42, '0DD69E78'], [.76, '00D69E78'], [1, '00D69E78']], .721], sheen: [.33, .25, .98, [[0, '21E2D6F6'], [.30, '0AB4A8D2'], [.54, '00B4A8D2'], [1, '00B4A8D2']]], drop: '4DE4CEA4', lit: '14E4D8FA', limb: 'BF020206', corona: true },
+    night: { body: [.40, .32, .95, [[0, 'FF16151F'], [.46, 'FF0D0C14'], [.78, 'FF08080E'], [1, 'FF040409']]], sheen: [.30, .24, .90, [[0, '14E8DCB8'], [.44, '00E8DCB8'], [1, '00E8DCB8']]], lit: '14C6B688', limb: 'B3030304' } },
 };
-function grad(ctx, x, y, r, stops) {
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  for (let s = 0; s < stops.length; s++) {
-    const [p0, h0, a0] = stops[s], c0 = hex(h0); g.addColorStop(p0, rgba(c0, a0));
-    if (s + 1 < stops.length) { const [p1, h1, a1] = stops[s + 1], c1 = hex(h1); for (let k = 1; k < 8; k++) { const f = k / 8; g.addColorStop(p0 + (p1 - p0) * f, rgba(c0.map((v, j) => Math.round(v + (c1[j] - v) * f)), a0 + (a1 - a0) * f)); } }
-  }
-  return g;
-}
-function sphere(ctx, spec, d, stars) {
-  ctx.clearRect(0, 0, d, d); ctx.save(); ctx.beginPath(); ctx.arc(d / 2, d / 2, d / 2, 0, 7); ctx.clip();
-  for (const [x, y, r, st] of spec.layers) { ctx.fillStyle = grad(ctx, x * d, y * d, r * d, st); ctx.fillRect(0, 0, d, d); }
-  ctx.fillStyle = grad(ctx, .34 * d, .28 * d, 1.12 * d, [[0, '#000000', 0], [.7, '#000000', 0], [1, spec.limb[0], spec.limb[1]]]); ctx.fillRect(0, 0, d, d);
-  ctx.fillStyle = grad(ctx, .22 * d, .16 * d, .75 * d, [[0, spec.lit[0], spec.lit[1]], [.55, '#000000', 0], [1, '#000000', 0]]); ctx.fillRect(0, 0, d, d);
-  if (stars) for (const [sx, sy, sr, sa] of [[.40, .34, 1.2, .9], [.62, .48, 1.0, .7], [.52, .66, 1.0, .6], [.30, .56, 1.0, .55], [.70, .30, 1.1, .7], [.44, .22, .9, .5], [.24, .44, .9, .5]]) {
-    ctx.fillStyle = `rgba(240,244,255,${sa})`; ctx.beginPath(); ctx.arc(sx * d, sy * d, sr * stars, 0, 7); ctx.fill();
+const hexRgb = h => [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+// one sky sphere into a square canvas d px wide: body, light event, sheen, limb shadow, lit inset (+ stars at night)
+function sphere(ctx, spec, d, starScale) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, d, d); ctx.save(); ctx.beginPath(); ctx.arc(d / 2, d / 2, d / 2, 0, TAU); ctx.clip();
+  for (const L of [spec.body, spec.event, spec.sheen]) if (L) { const [x, y, r, st, sq = 1] = L; appBlob(ctx, x * d, y * d, Math.max(1, r * d), 1, sq, st); }
+  appBlob(ctx, .34 * d, .28 * d, 1.12 * d, 1, 1, [[0, '00000000'], [.7, '00000000'], [1, spec.limb]]);
+  appBlob(ctx, .22 * d, .16 * d, .75 * d, 1, 1, [[0, spec.lit], [.55, '00000000'], [1, '00000000']]);
+  if (starScale) for (const [sx, sy, sr, sa] of [[.40, .34, 1.2, .9], [.62, .48, 1.0, .7], [.52, .66, 1.0, .6], [.30, .56, 1.0, .55], [.70, .30, 1.1, .7], [.44, .22, .9, .5], [.24, .44, .9, .5]]) {
+    ctx.fillStyle = `rgba(240,244,255,${sa})`; ctx.beginPath(); ctx.arc(sx * d, sy * d, sr * starScale, 0, TAU); ctx.fill();
   }
   ctx.restore();
 }
@@ -841,12 +1058,14 @@ function paintOrb(now) {
   cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, W, W); cx.setTransform(s, 0, 0, s, 0, 0);
   // warm drop halo, receding as night falls
   cx.save(); cx.translate(C0, C0); cx.scale(br, br); cx.translate(-C0, -C0);
-  const hy = C0 + orbD * .10, hr = orbD * .72, ha = .38 * clamp(1 - .7 * p, 0, 1), hg = cx.createRadialGradient(C0, hy, 0, C0, hy, hr);
-  hg.addColorStop(0, `rgba(130,185,215,${ha})`); hg.addColorStop(1, 'rgba(130,185,215,0)'); cx.fillStyle = hg; cx.beginPath(); cx.arc(C0, hy, hr, 0, 7); cx.fill();
+  const spec = APP_THEMES[siteTheme], dg = spec.day.drop, hy = C0 + orbD * .10, ha = argb(dg)[3] * clamp(1 - .7 * p, 0, 1);
+  appBlob(cx, C0, hy, orbD * .72, 1, 1, [[0, withA(dg, ha)], [1, withA(dg, 0)]]);
+  // Eclipse alone carries light outside its limb: the corona, gone by the time night has fallen
+  if (spec.day.corona) orbCorona(cx, C0, C0, orbD, (now - t0) / 1000, clamp(1 - p, 0, 1));
   // day sphere fades almost out, night sphere + stars fade in
   const d = Math.max(2, Math.round(orbD * s * br));
   if (offA.width !== d) { offA.width = offA.height = offB.width = offB.height = d; }
-  sphere(offA.getContext('2d'), SPHERE.day, d, 0); sphere(offB.getContext('2d'), SPHERE.night, d, s * br);
+  sphere(offA.getContext('2d'), spec.day, d, 0); sphere(offB.getContext('2d'), spec.night, d, s * br);
   cx.restore(); cx.setTransform(1, 0, 0, 1, 0, 0);
   const o = W / 2 - d / 2;
   cx.globalAlpha = clamp(1 - .92 * p, 0, 1); cx.drawImage(offA, o, o);
@@ -897,7 +1116,7 @@ orb.addEventListener('contextmenu', e => e.preventDefault());
 const hhmm = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 let endAt = 0, lockM = 0, tickT = 0;
 function lock() {
-  locked = true; committing = false; lockM = STEPS[idx]; endAt = Date.now() + lockM * 60000;
+  locked = true; committing = false; lockM = STEPS[idx]; endAt = Date.now() + lockM * 60000; lockT0 = Date.now(); lockTotal = lockM * 60000;
   // Full Lock shows the overlay with Emergency at the bottom; Selective shows the Compose lock screen
   $('#lk').classList.toggle('sel', mode === 'sel');
   updateCount(); tickT = setInterval(updateCount, 1000);
@@ -925,6 +1144,38 @@ clock(); setInterval(clock, 30000);
 $('#week').innerHTML = [6, 5, 4, 3, 2, 1, 0].map(k => { const d = new Date(Date.now() - k * 864e5); return `<span class="${k ? 'held' : 'today'}">${'SMTWTFS'[d.getDay()]}</span>`; }).join('');
 setMode('sel'); render();
 
+// recolour the replica for a theme: accent (ticks, rings, labels, capsule), title, subtitle, numerals,
+// the orb's sky sphere, and the lock screen behind it
+function applyAppTheme(id) {
+  const th = APP_THEMES[id]; if (!th) return; siteTheme = id; ACC = hexRgb(th.accent); TINT = tints();
+  const v = scr.style, rgb = h => hexRgb(h).join(',');
+  v.setProperty('--a', '#' + th.accent); v.setProperty('--a-rgb', rgb(th.accent)); v.setProperty('--at', '#' + th.active);
+  v.setProperty('--st-rgb', rgb(th.subtitle)); v.setProperty('--num', '#' + th.numeral); v.setProperty('--num-rgb', rgb(th.numeral));
+  render(); wake(); lockSky.repaint();
+}
+
+// first arrival: the phone settles in, its screen wakes, the dial's ticks sweep round to the chosen
+// length one by one, then the orb fades in. Any touch or key skips straight to the end.
+const demoEl = $('#demo');
+if (!REDUCE) {
+  demoEl.classList.add('arrive'); scr.classList.add('waking'); sweep = -1; render();
+  let sweepT = 0, introDone = false;
+  const finishIntro = () => { if (introDone) return; introDone = true; clearTimeout(sweepT); sweep = Infinity; render(); scr.classList.remove('waking'); };
+  sweepT = setTimeout(function step() { sweep++; render(); if (sweep < idx) sweepT = setTimeout(step, 70); else setTimeout(finishIntro, 120); }, 1900);
+  ['pointerdown', 'keydown'].forEach(ev => demoEl.addEventListener(ev, finishIntro, { capture: true }));
+  demoEl.addEventListener('animationend', e => { if (e.target === demoEl) demoEl.classList.remove('arrive'); });
+  // desktop: the phone leans a few degrees towards the pointer, and lies flat while the pointer is on it
+  // so turning the dial stays exact
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const hero = $('#hero'), tilt = (rx, ry) => { demoEl.style.setProperty('--rx', rx.toFixed(2) + 'deg'); demoEl.style.setProperty('--ry', ry.toFixed(2) + 'deg'); };
+    hero.addEventListener('pointermove', e => {
+      if (demoEl.classList.contains('arrive') || demoEl.contains(e.target)) return tilt(0, 0);
+      const r = hero.getBoundingClientRect(); tilt(((e.clientY - r.top) / r.height - .5) * -7, ((e.clientX - r.left) / r.width - .5) * 10);
+    });
+    hero.addEventListener('pointerleave', () => tilt(0, 0));
+  }
+}
+
 /* ── manifesto ──────────────────────────────────────────────── */
 const mp = $('#manifestoText');
 mp.innerHTML = mp.textContent.split(/\s+/).map(w => w.startsWith('*') ? `<span class="w em">${w.replace(/\*/g, '')}</span>` : `<span class="w">${w}</span>`).join(' ');
@@ -934,7 +1185,7 @@ const mwords = [...mp.querySelectorAll('.w')];
 const modes = $('#modes'), stageImgs = [...document.querySelectorAll('.modes .pin > .device img')], stepEls = [...document.querySelectorAll('.step')], bar = $('#stepBar');
 let curStep = 0;
 const stepsRow = $('#steps'), dots = $('#stepDots');
-function setStep(i) { if (i === curStep) return; curStep = i; stageImgs.forEach((im, k) => im.classList.toggle('on', k === i)); stepEls.forEach((s, k) => s.classList.toggle('on', k === i)); [...dots.children].forEach((d, k) => d.setAttribute('aria-current', k === i)); }
+function setStep(i) { if (i === curStep) return; curStep = i; stageImgs.forEach((im, k) => im.classList.toggle('on', k === i)); stepEls.forEach((s, k) => s.classList.toggle('on', k === i)); [...dots.children].forEach((d, k) => d.setAttribute('aria-current', k === i)); $('#stepCount').textContent = `${i + 1} / ${stepEls.length}`; }
 // phones: the steps are a swipeable row; the dots follow the swipe and jump to a card
 stepEls.forEach((st, k) => { const d = document.createElement('button'); d.innerHTML = '<i></i>'; d.setAttribute('aria-label', st.querySelector('.num').textContent); d.setAttribute('aria-current', k === 0); d.onclick = () => SLIDE ? scrollTo({ top: modes.offsetTop + HOLD[k] * (modes.offsetHeight - innerHeight), behavior: REDUCE ? 'auto' : 'smooth' }) : stepsRow.scrollTo({ left: st.offsetLeft - (stepsRow.clientWidth - st.offsetWidth) / 2, behavior: REDUCE ? 'auto' : 'smooth' }); dots.appendChild(d); });
 
@@ -972,6 +1223,8 @@ stepsRow.addEventListener('scroll', () => { if (innerWidth <= 900 && !SLIDE) sli
 // It switches on a little before the card you're heading towards (so a fling coming in is caught on
 // the first card, or on the last one coming up from below) and off only once you leave past an end.
 let snapOn = false, gateY = scrollY;
+// an in-page link jumps straight past the cards, so snapping lets go first
+document.addEventListener('click', e => { if (snapOn && e.target.closest('a[href^="#"]')) { snapOn = false; document.documentElement.style.scrollSnapType = ''; } }, true);
 function snapGate(y, vh) {
   const down = y >= gateY; gateY = y;
   if (!SLIDE || innerWidth > 900) { if (snapOn) { document.documentElement.style.scrollSnapType = ''; snapOn = false; } return; }
@@ -995,19 +1248,36 @@ const THEMES = [
 let themeIdx = 1, userPicked = false, themesVisible = false;
 const themeCanvas = $('#themeSky'), themeSky = runner(themeCanvas, (ctx, w, h, t) => SKY[THEMES[themeIdx].id](ctx, w, h, t));
 const tabs = $('#tabs'), tName = $('#themeName'), tLine = $('#themeLine'), root = document.documentElement;
-THEMES.forEach((th, i) => { const b = document.createElement('button'); b.className = 'tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === themeIdx); b.innerHTML = `<i style="background:${th.dot}"></i>${th.name}`; b.onclick = () => { userPicked = true; setTheme(i); }; tabs.appendChild(b); });
+THEMES.forEach((th, i) => { const b = document.createElement('button'); b.className = 'tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', i === themeIdx); b.innerHTML = `<i style="background:${th.dot}"></i>${th.name}`; b.onclick = () => pickTheme(i); tabs.appendChild(b); });
 function setTheme(i) {
   if (i === themeIdx) return; themeIdx = i; const th = THEMES[i];
   [...tabs.children].forEach((b, k) => b.setAttribute('aria-selected', k === i));
   themeCanvas.style.opacity = 0; tName.classList.add('out'); tLine.classList.add('out');
   setTimeout(() => { themeSky.repaint(); themeCanvas.style.opacity = 1; tName.textContent = th.name; tLine.textContent = th.line; tName.classList.remove('out'); tLine.classList.remove('out'); }, 450);
-  root.style.setProperty('--accent', th.accent); root.style.setProperty('--accent-light', th.light);
+  // while it cycles on its own, only this section takes the colour; tapping a sky dresses the whole page
+  themesSec.style.setProperty('--accent', th.accent); themesSec.style.setProperty('--accent-light', th.light);
 }
+const themesSec = $('#themes'), planOrbs = $('#planOrbs'), resetBtn = $('#themeReset'), THEME_KEY = 'stillness-theme';
+THEMES.forEach((th, i) => { const b = document.createElement('button'); b.style.background = th.dot; b.setAttribute('aria-label', `Try the ${th.name} sky on this page`); b.setAttribute('aria-pressed', 'false'); b.onclick = () => pickTheme(i); planOrbs.appendChild(b); });
+function markPicked(i) { [...planOrbs.children].forEach((b, k) => b.setAttribute('aria-pressed', k === i)); resetBtn.hidden = i < 0; }
+function pickTheme(i, save = true) {
+  const th = THEMES[i]; userPicked = true; setTheme(i);
+  for (const [k, v] of [['--accent', th.accent], ['--accent-light', th.light], ['--cta', th.accent], ['--cta-light', th.light]]) root.style.setProperty(k, v);
+  applyAppTheme(th.id); heroSky.repaint(); markPicked(i);
+  if (save) try { localStorage.setItem(THEME_KEY, th.id); } catch (_) {}
+}
+function resetTheme() {
+  userPicked = false; ['--accent', '--accent-light', '--cta', '--cta-light'].forEach(k => root.style.removeProperty(k));
+  applyAppTheme('ocean'); heroSky.repaint(); setTheme(1); markPicked(-1);
+  try { localStorage.removeItem(THEME_KEY); } catch (_) {}
+}
+resetBtn.onclick = resetTheme;
+try { const saved = THEMES.findIndex(th => th.id === localStorage.getItem(THEME_KEY)); if (saved >= 0) pickTheme(saved, false); } catch (_) {}
 new IntersectionObserver(([e]) => { themesVisible = e.isIntersecting; if (!e.isIntersecting && !userPicked && themeIdx !== 1 && e.boundingClientRect.top > 0) setTheme(1); }, { threshold: .5 }).observe($('#themes'));
 if (!REDUCE) setInterval(() => { if (themesVisible && !userPicked) setTheme((themeIdx + 1) % THEMES.length); }, 7000);
 
 /* ── final sky + reveals ────────────────────────────────────── */
-runner($('#finalSky'), (ctx, w, h, t) => { SKY.ocean(ctx, w, h, t); ctx.fillStyle = 'rgba(3,6,10,.45)'; ctx.fillRect(0, 0, w, h); stars(ctx, w, h, t + 9, { maxY: .8, alpha: .55 }); });
+runner($('#finalSky'), (ctx, w, h, t) => { SKY[siteTheme](ctx, w, h, t); ctx.fillStyle = 'rgba(3,6,10,.45)'; ctx.fillRect(0, 0, w, h); stars(ctx, w, h, t + 9, { maxY: .8, alpha: .55 }); });
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15, rootMargin: '0px 0px -8% 0px' });
 document.querySelectorAll('.rv').forEach(el => io.observe(el));
 })();

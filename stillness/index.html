@@ -294,6 +294,12 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     .modes{height:400svh;view-timeline:--modes block}
     .modes .pin{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:stretch;padding:58px 0 0;overflow:hidden}
     .modes .pin > div{width:100%;min-width:0}
+    /* a flick can't run past a card: each resting point (5/35/65/95% of the pinned scroll) is a snap
+       stop the scroll may not pass. Snapping is mandatory, so two tall zones cover the page above and
+       below; a snap area taller than the screen scrolls freely inside, so nothing else snaps. */
+    html{scroll-snap-type:y mandatory}
+    i.snapzone{display:block;position:absolute;left:0;width:1px;scroll-snap-align:start;pointer-events:none;visibility:hidden}
+    .modes i.snap{display:block;position:absolute;left:0;width:1px;height:1px;scroll-snap-align:start;scroll-snap-stop:always;pointer-events:none}
     .steps{overflow:visible;padding:0;scroll-snap-type:none;will-change:transform;animation:stepSlide linear both;animation-timeline:--modes;animation-range:contain 0% contain 100%}
   }
   .step h3{font-size:25px}
@@ -327,6 +333,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   90%, 100% { transform:translate3d(calc((100vw - var(--W)) / 2 - 3 * (var(--W) + 14px)), 0, 0) }
 }
 /* steps' dots (phones only) */
+.modes .snap,.snapzone{display:none}
 .dots{display:none}
 .dots button{width:26px;height:26px;border:0;background:none;cursor:pointer;display:grid;place-items:center;padding:0}
 .dots button i{width:6px;height:6px;border-radius:50%;background:rgba(233,240,242,.25);transition:background .3s,transform .3s}
@@ -356,6 +363,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
     <a class="pill" href="https://play.google.com/store/apps/details?id=com.spiralstudio.stillness">Get the app</a>
   </div>
 </nav>
+<i class="snapzone" id="zoneA" aria-hidden="true"></i><i class="snapzone" id="zoneB" aria-hidden="true"></i>
 <a class="mcta" id="mcta" href="https://play.google.com/store/apps/details?id=com.spiralstudio.stillness" aria-hidden="true" tabindex="-1">Get the app <small>free on Google Play</small></a>
 
 <header class="hero" id="hero">
@@ -431,6 +439,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
 </section>
 
 <section class="modes" id="modes" aria-label="How it works">
+  <i class="snap" style="top:15svh"></i><i class="snap" style="top:105svh"></i><i class="snap" style="top:195svh"></i><i class="snap" style="top:285svh"></i>
   <div class="pin">
     <div class="device" aria-hidden="true"><div class="scr">
       <img class="shot on" src="img/app-lock.webp" alt="">
@@ -957,6 +966,15 @@ function slideSteps() {
   else { const mid = stepsRow.scrollLeft + stepsRow.clientWidth / 2; let best = 0, bd = 1e9; stepEls.forEach((st, k) => { const d = Math.abs(st.offsetLeft + st.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = k; } }); setStep(best); }
 }
 stepsRow.addEventListener('scroll', () => { if (innerWidth <= 900 && !SLIDE) slideSteps(); }, { passive: true });
+// the free-scrolling zones around the pinned cards: A runs from the top of the page to the first stop
+// (its end meets the bottom of the screen exactly there), B from the last stop to the end of the page
+function placeZones() {
+  if (!SLIDE || innerWidth > 900) return;
+  const marks = [...modes.querySelectorAll('.snap')].map(m => modes.offsetTop + m.offsetTop), vh = innerHeight;
+  Object.assign($('#zoneA').style, { top: '0px', height: marks[0] + vh + 'px' });
+  Object.assign($('#zoneB').style, { top: marks[3] + 'px', height: Math.max(vh * 2, document.body.offsetHeight - marks[3]) + 'px' }); // body height ignores the zones themselves
+}
+new ResizeObserver(placeZones).observe(document.body); addEventListener('resize', placeZones); placeZones();
 addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
 addEventListener('resize', onScroll); onScroll();
 

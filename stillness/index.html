@@ -48,6 +48,10 @@
   transition: --accent 1.2s var(--ease), --accent-light 1.2s var(--ease), --cta 1.2s var(--ease), --cta-light 1.2s var(--ease);
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* no blue tap flash or click ring; keyboard users still get a soft ring in the theme colour */
+*{-webkit-tap-highlight-color:transparent}
+:focus:not(:focus-visible){outline:none}
+:focus-visible{outline:2px solid color-mix(in srgb,var(--accent) 70%,transparent);outline-offset:3px}
 html{overflow-x:hidden}
 @supports (overflow:clip){html{overflow-x:clip}}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}

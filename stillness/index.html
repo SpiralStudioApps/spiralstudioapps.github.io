@@ -945,7 +945,10 @@ function onScroll() {
   nav.classList.toggle('solid', y > vh * .5);
   snapGate(y, vh);
   const fr = finalSec.getBoundingClientRect(); const mdr = modes.getBoundingClientRect(); mcta.classList.toggle('show', y > heroSec.offsetHeight - vh * .2 && fr.top > vh * .8 && !(mdr.top < vh * .5 && mdr.bottom > vh * .5)); // out of the way of the pinned cards
-  if (y > vh && y > lastY + 4) nav.classList.add('hide'); else if (y < lastY - 4 || y < vh) nav.classList.remove('hide'); lastY = y;
+  // phones: while the four cards are pinned the top bar stays away, so it can't drop in over a card
+  // (snapping nudges the page up and down) and then slide off again
+  const mr0 = modes.getBoundingClientRect(), overCards = innerWidth <= 900 && mr0.top < vh * .35 && mr0.bottom > vh * .65;
+  if (overCards || (y > vh && y > lastY + 4)) nav.classList.add('hide'); else if (y < lastY - 4 || y < vh) nav.classList.remove('hide'); lastY = y;
   if (!REDUCE) {
     const mr = manifesto.getBoundingClientRect(); const mpg = clamp((vh * .9 - mr.top) / (mr.height * .75), 0, 1);
     const lit = Math.floor(mpg * mwords.length * 1.05); mwords.forEach((w, i) => w.classList.toggle('on', i < lit));

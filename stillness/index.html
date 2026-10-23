@@ -376,7 +376,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
           </div>
         </div>
       </div>
-      <p class="demo-cap" id="demoCap"><b>This is the app.</b> Turn the dial, pick a mode, then press and hold the orb.</p>
+      <p class="demo-cap" id="demoCap"><b>This is the app.</b> Turn the dial to choose how long, then press and hold the orb.</p>
       <button class="endbtn" id="endDemo">End demo</button>
     </div>
   </div>
@@ -853,7 +853,7 @@ function updateCount() {
 function unlock() {
   locked = false; committing = false; clearInterval(tickT); p = 0; bloom = 0; wake();
   document.body.classList.remove('is-night'); nightTarget = 0; if (REDUCE) heroSky.repaint();
-  $('#demoCap').innerHTML = '<b>This is the app.</b> Turn the dial, pick a mode, then press and hold the orb.';
+  $('#demoCap').innerHTML = '<b>This is the app.</b> Turn the dial to choose how long, then press and hold the orb.';
 }
 $('#endDemo').onclick = unlock;
 

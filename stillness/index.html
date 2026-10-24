@@ -35,13 +35,13 @@
 <style>
 @property --accent { syntax: '<color>'; inherits: true; initial-value: #b7d7ea; }
 @property --accent-light { syntax: '<color>'; inherits: true; initial-value: #dcedf8; }
-@property --cta { syntax: '<color>'; inherits: true; initial-value: #e2d0a0; }
-@property --cta-light { syntax: '<color>'; inherits: true; initial-value: #f2e6c4; }
+@property --cta { syntax: '<color>'; inherits: true; initial-value: #b7d7ea; }
+@property --cta-light { syntax: '<color>'; inherits: true; initial-value: #dcedf8; }
 :root{
   --bg:#070b11; --card:rgba(255,255,255,.035); --line:rgba(233,240,242,.09);
   --text:#e9f0f2; --muted:rgba(233,240,242,.55); --faint:rgba(233,240,242,.3);
   --accent:#b7d7ea; --accent-light:#dcedf8;
-  --cta:#e2d0a0; --cta-light:#f2e6c4; /* buttons: Eclipse gold until a visitor picks a theme */
+  --cta:#b7d7ea; --cta-light:#dcedf8; /* buttons wear the current theme's accent: Ocean until a visitor picks one */
   --serif:"Playfair Display", Georgia, "Times New Roman", serif;
   --sans:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --ease:cubic-bezier(.22,.61,.36,1);
@@ -77,8 +77,8 @@ nav.hide{transform:translateY(-100%)}
 nav .links{display:flex;align-items:center;gap:28px;font-size:14px}
 nav .links a{text-decoration:none;color:var(--muted);transition:color .3s}
 nav .links a:hover{color:var(--text)}
-/* filled with the Eclipse theme's gold so the one call to action stands out */
-nav .pill{color:#14110A!important;background:var(--cta);border:1px solid var(--cta);border-radius:999px;padding:8px 16px;font-weight:500;box-shadow:0 0 0 rgba(226,208,160,0);transition:background .3s,border-color .3s,box-shadow .3s}
+/* filled with the theme's accent so the one call to action stands out */
+nav .pill{color:#14110A!important;background:var(--cta);border:1px solid var(--cta);border-radius:999px;padding:8px 16px;font-weight:500;box-shadow:0 0 0 transparent;transition:background .3s,border-color .3s,box-shadow .3s}
 nav .pill:hover,nav .pill:focus-visible{background:var(--cta-light);border-color:var(--cta-light);box-shadow:0 0 22px color-mix(in srgb,var(--cta) 40%,transparent)}
 
 /* ── phone frame (shared) ── */
@@ -390,6 +390,14 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .manifesto .w{color:var(--text)}
 }
 </style>
+<script>
+// A theme picked on an earlier visit is applied before the first paint, so the buttons and accents
+// don't start in Ocean and fade across (the full theme, skies included, is applied further down).
+try {
+  const T = { dusk: ['#ECA36B', '#F2BE8E'], ocean: ['#B7D7EA', '#DCEDF8'], forest: ['#C2D89C', '#E0ECC4'], aurora: ['#B4A8E2', '#DCD4F4'], eclipse: ['#E2D0A0', '#F2E6C4'] }[localStorage.getItem('stillness-theme')];
+  if (T) for (const [k, v] of [['--accent', T[0]], ['--accent-light', T[1]], ['--cta', T[0]], ['--cta-light', T[1]]]) document.documentElement.style.setProperty(k, v);
+} catch (_) {}
+</script>
 </head>
 <body>
 

@@ -494,4 +494,5 @@ document.getElementById('beads').onclick = () => { start = performance.now() - 1
 document.getElementById('total').onclick = () => { start = performance.now() - 30000; paused = false; document.getElementById('pause').textContent = 'Pause'; };
 document.getElementById('pause').onclick = e => { paused = !paused; if (paused) pausedAt = performance.now(); else start += performance.now() - pausedAt; e.target.textContent = paused ? 'Resume' : 'Pause'; };
 })();
-</script></body></html>
+</script><!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9dbc2716345e4a228d8b6df5f758181e"}'></script><!-- End Cloudflare Web Analytics -->
+</body></html>

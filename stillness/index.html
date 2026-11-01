@@ -316,7 +316,7 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
   .modes .pin{position:static;height:auto;display:block;padding:100px 0 70px}
   .modes .pin > .device{display:none}
   .modes .pin .eyebrow{text-align:center;padding:0 20px;margin-bottom:18px!important}
-  .steps{--W:min(82vw,380px);padding:0 calc((100vw - var(--W)) / 2) 6px;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+  .steps{--W:min(82vw,380px);--G:14px;padding:0 calc((100vw - var(--W)) / 2) 6px;display:flex;gap:var(--G);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
   .steps::-webkit-scrollbar{display:none}
   .steps::before,.steps .bar{display:none}
   .step{flex:0 0 var(--W);scroll-snap-align:center;padding:0;opacity:1!important;text-align:center;transition:none}
@@ -331,7 +331,8 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
        stop the scroll may not pass. Script switches snapping on only while the section is on screen,
        so the rest of the page scrolls natively. */
     .modes i.snap{display:block;position:absolute;left:0;width:1px;height:1px;scroll-snap-align:start;scroll-snap-stop:always;pointer-events:none}
-    .steps{overflow:visible;padding:0;scroll-snap-type:none;will-change:transform;animation:stepSlide linear both;animation-timeline:--modes;animation-range:contain 0% contain 100%}
+    /* pinned cards scroll down, not sideways, so keep the next card fully off-screen (no cut-off words at the edges) */
+    .steps{--G:calc((100vw - var(--W)) / 2 + 16px);overflow:visible;padding:0;scroll-snap-type:none;will-change:transform;animation:stepSlide linear both;animation-timeline:--modes;animation-range:contain 0% contain 100%}
   }
   .step h3{font-size:25px}
   .step p{max-height:none;opacity:1;margin:0 auto;font-size:15px;line-height:1.5}
@@ -364,9 +365,9 @@ footer a{text-decoration:none}footer a:hover{color:var(--text)}
 /* phones: each card rests centred, then eases across to the next (one screen of scrolling per card) */
 @keyframes stepSlide {
   0%, 10%   { transform:translate3d(calc((100vw - var(--W)) / 2), 0, 0); animation-timing-function:ease-in-out }
-  30%, 40%  { transform:translate3d(calc((100vw - var(--W)) / 2 - (var(--W) + 14px)), 0, 0); animation-timing-function:ease-in-out }
-  60%, 70%  { transform:translate3d(calc((100vw - var(--W)) / 2 - 2 * (var(--W) + 14px)), 0, 0); animation-timing-function:ease-in-out }
-  90%, 100% { transform:translate3d(calc((100vw - var(--W)) / 2 - 3 * (var(--W) + 14px)), 0, 0) }
+  30%, 40%  { transform:translate3d(calc((100vw - var(--W)) / 2 - (var(--W) + var(--G))), 0, 0); animation-timing-function:ease-in-out }
+  60%, 70%  { transform:translate3d(calc((100vw - var(--W)) / 2 - 2 * (var(--W) + var(--G))), 0, 0); animation-timing-function:ease-in-out }
+  90%, 100% { transform:translate3d(calc((100vw - var(--W)) / 2 - 3 * (var(--W) + var(--G))), 0, 0) }
 }
 /* pinned cards' cue (phones with scroll-driven animations only) */
 .scrollhint{display:none;align-items:center;justify-content:center;gap:10px;margin-top:16px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}

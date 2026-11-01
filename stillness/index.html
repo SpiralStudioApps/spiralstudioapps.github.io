@@ -711,7 +711,9 @@ function runner(canvas, draw) {
   const ctx = canvas.getContext('2d');
   let raf = 0, visible = false; const t0 = performance.now();
   const paint = now => draw(ctx, canvas.width, canvas.height, REDUCE ? 4 : (now - t0) / 1000);
-  const size = () => { const r = canvas.getBoundingClientRect(); canvas.width = Math.max(1, Math.round(r.width * DPR)); canvas.height = Math.max(1, Math.round(r.height * DPR)); paint(performance.now()); };
+  // clientWidth/Height, not getBoundingClientRect: the hero phone tilts in 3D, and a tilted box would give the
+  // canvas the wrong proportions (a stretched sun)
+  const size = () => { canvas.width = Math.max(1, Math.round(canvas.clientWidth * DPR)); canvas.height = Math.max(1, Math.round(canvas.clientHeight * DPR)); paint(performance.now()); };
   const frame = now => { paint(now); if (visible && !REDUCE) raf = requestAnimationFrame(frame); };
   new ResizeObserver(size).observe(canvas);
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; cancelAnimationFrame(raf); if (visible) raf = requestAnimationFrame(frame); }).observe(canvas);
